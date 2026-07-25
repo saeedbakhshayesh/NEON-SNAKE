@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>مار نئونی</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;800&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#05060a;
+    --grid:#0b0f16;
+    --grid-line:#121a26;
+    --cyan:#00f0ff;
+    --magenta:#ff2ec4;
+    --gold:#ffd60a;
+    --danger:#ff4d4d;
+    --text:#dfe9f2;
+    --muted:#5c7089;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;
+    height:100%;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Vazirmatn',sans-serif;
+    overflow:hidden;
+    -webkit-tap-highlight-color:transparent;
+  }
+  body{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-start;
+    padding:18px 14px 10px;
+    background:
+      radial-gradient(circle at 50% -10%, #0d1b2a 0%, var(--bg) 55%);
+    min-height:100%;
+  }
+  .title{
+    font-family:'Press Start 2P',monospace;
+    font-size:15px;
+    letter-spacing:1px;
+    color:var(--cyan);
+    text-shadow:0 0 6px var(--cyan), 0 0 18px rgba(0,240,255,.5);
+    margin:2px 0 14px;
+    text-align:center;
+    direction:ltr;
+  }
+  .hud{
+    display:flex;
+    gap:22px;
+    margin-bottom:12px;
+    font-family:'Press Start 2P',monospace;
+    font-size:10px;
+    direction:ltr;
+  }
+  .hud .box{
+    background:var(--grid);
+    border:1px solid var(--grid-line);
+    padding:8px 12px;
+    border-radius:6px;
+    text-align:center;
+    min-width:78px;
+  }
+  .hud .box span{display:block;margin-top:5px;}
+  .hud .score span{color:var(--cyan);text-shadow:0 0 6px var(--cyan);}
+  .hud .best span{color:var(--gold);text-shadow:0 0 6px var(--gold);}
+  .hud .label{color:var(--muted);font-size:8px;}
+
+  .board-wrap{
+    position:relative;
+    border:2px solid #16324a;
+    border-radius:10px;
+    box-shadow:0 0 0 1px rgba(0,240,255,.08), 0 0 24px rgba(0,240,255,.15), inset 0 0 24px rgba(0,0,0,.6);
+    background:var(--grid);
+    max-width:94vw;
+  }
+  canvas{
+    display:block;
+    border-radius:8px;
+    max-width:94vw;
+    height:auto;
+  }
+
+  .overlay{
+    position:absolute;
+    inset:0;
+    background:rgba(3,5,9,.86);
+    border-radius:8px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:14px;
+    text-align:center;
+    padding:20px;
+  }
+  .overlay.hidden{display:none;}
+  .overlay h2{
+    font-family:'Press Start 2P',monospace;
+    font-size:16px;
+    color:var(--magenta);
+    text-shadow:0 0 8px var(--magenta), 0 0 20px rgba(255,46,196,.5);
+    margin:0;
+    direction:ltr;
+  }
+  .overlay p{margin:0;color:var(--muted);font-size:13px;max-width:280px;line-height:1.9;}
+  .btn{
+    font-family:'Vazirmatn',sans-serif;
+    font-weight:600;
+    font-size:14px;
+    background:transparent;
+    color:var(--cyan);
+    border:1.5px solid var(--cyan);
+    padding:10px 26px;
+    border-radius:8px;
+    cursor:pointer;
+    box-shadow:0 0 10px rgba(0,240,255,.25);
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .btn:hover{box-shadow:0 0 18px rgba(0,240,255,.55);}
+  .btn:active{transform:scale(.96);}
+
+  .legend{
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+    justify-content:center;
+    margin-top:12px;
+    font-size:11px;
+    color:var(--muted);
+    max-width:340px;
+  }
+  .legend span{display:inline-flex;align-items:center;gap:5px;}
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
+  .dot.food{background:var(--magenta);box-shadow:0 0 6px var(--magenta);}
+  .dot.speed{background:var(--gold);box-shadow:0 0 6px var(--gold);}
+  .dot.double{background:#7cff6b;box-shadow:0 0 6px #7cff6b;}
+  .dot.obstacle{background:var(--danger);box-shadow:0 0 6px var(--danger);}
+
+  .joystick-wrap{
+    display:none;
+    margin-top:18px;
+    touch-action:none;
+  }
+  .joystick-base{
+    position:relative;
+    width:150px;
+    height:150px;
+    border-radius:50%;
+    background:radial-gradient(circle at 50% 45%, #0d1723 0%, var(--grid) 70%);
+    border:1.5px solid var(--grid-line);
+    box-shadow:0 0 0 1px rgba(0,240,255,.08), 0 0 20px rgba(0,240,255,.12), inset 0 0 18px rgba(0,0,0,.6);
+  }
+  .joystick-arrow{
+    position:absolute;
+    color:var(--muted);
+    pointer-events:none;
+    line-height:0;
+  }
+  .joystick-arrow svg{display:block;}
+  .joystick-arrow.right svg{transform:rotate(90deg);}
+  .joystick-arrow.down svg{transform:rotate(180deg);}
+  .joystick-arrow.left svg{transform:rotate(270deg);}
+  .joystick-arrow.up{top:10px;left:50%;transform:translateX(-50%);}
+  .joystick-arrow.down{bottom:10px;left:50%;transform:translateX(-50%);}
+  .joystick-arrow.left{left:10px;top:50%;transform:translateY(-50%);}
+  .joystick-arrow.right{right:10px;top:50%;transform:translateY(-50%);}
+  .joystick-stick{
+    position:absolute;
+    width:60px;
+    height:60px;
+    border-radius:50%;
+    top:50%;
+    left:50%;
+    background:radial-gradient(circle at 35% 30%, #1a2733 0%, var(--grid) 75%);
+    border:1.5px solid var(--cyan);
+    box-shadow:0 0 12px rgba(0,240,255,.4);
+    transform:translate(-50%,-50%);
+    transition:transform .08s ease;
+    pointer-events:none;
+  }
+
+  @media (hover:none) and (pointer:coarse){
+    .joystick-wrap{display:flex;justify-content:center;}
+  }
+</style>
+</head>
+<body>
+
+  <div class="title">NEON SNAKE</div>
+
+  <div class="hud">
+    <div class="box score"><span class="label">امتیاز</span><span id="score">0</span></div>
+    <div class="box best"><span class="label">بهترین</span><span id="best">0</span></div>
+  </div>
+
+  <div class="board-wrap">
+    <canvas id="board" width="360" height="360"></canvas>
+
+    <div class="overlay" id="startOverlay">
+      <h2>NEON SNAKE</h2>
+      <p>با فلش‌ها یا لمس حرکت کن، غذا بخور، مراقب موانع باش و پاور-آپ‌ها رو شکار کن.</p>
+      <button class="btn" id="startBtn">شروع بازی</button>
+    </div>
+
+    <div class="overlay hidden" id="overOverlay">
+      <h2>GAME OVER</h2>
+      <p id="finalScoreText">امتیاز: 0</p>
+      <button class="btn" id="restartBtn">دوباره بازی کن</button>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span><i class="dot food"></i> غذا</span>
+    <span><i class="dot speed"></i> سرعت</span>
+    <span><i class="dot double"></i> امتیاز دوبل</span>
+    <span><i class="dot obstacle"></i> مانع</span>
+  </div>
+
+  <div class="joystick-wrap" id="joystickWrap">
+    <div class="joystick-base" id="joystickBase">
+      <div class="joystick-arrow up"><svg viewBox="0 0 24 24" width="14" height="14"><path d="M12 4 L20 18 L4 18 Z" fill="currentColor"/></svg></div>
+      <div class="joystick-arrow right"><svg viewBox="0 0 24 24" width="14" height="14"><path d="M12 4 L20 18 L4 18 Z" fill="currentColor"/></svg></div>
+      <div class="joystick-arrow down"><svg viewBox="0 0 24 24" width="14" height="14"><path d="M12 4 L20 18 L4 18 Z" fill="currentColor"/></svg></div>
+      <div class="joystick-arrow left"><svg viewBox="0 0 24 24" width="14" height="14"><path d="M12 4 L20 18 L4 18 Z" fill="currentColor"/></svg></div>
+      <div class="joystick-stick" id="joystickStick"></div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  const canvas = document.getElementById('board');
+  const ctx = canvas.getContext('2d');
+
+  const COLS = 20, ROWS = 20;
+  const CELL = canvas.width / COLS;
+
+  const COLORS = {
+    snakeHead: '#00f0ff',
+    snakeBody: '#00b3c4',
+    food: '#ff2ec4',
+    speed: '#ffd60a',
+    double: '#7cff6b',
+    obstacle: '#ff4d4d',
+    gridLine: 'rgba(255,255,255,0.03)'
+  };
+
+  const scoreEl = document.getElementById('score');
+  const bestEl = document.getElementById('best');
+  const startOverlay = document.getElementById('startOverlay');
+  const overOverlay = document.getElementById('overOverlay');
+  const finalScoreText = document.getElementById('finalScoreText');
+
+  let best = 0; // in-memory only (no localStorage available in this environment)
+
+  let snake, dir, nextDir, food, obstacles, powerUp, score;
+  let baseInterval = 180; // ms per step
+  let currentInterval = baseInterval;
+  let lastStep = 0;
+  let running = false;
+  let doubleScoreUntil = 0;
+  let speedBoostUntil = 0;
+  let powerUpTimer = null;
+  let rafId = null;
+
+  function randCell(exclude){
+    let cell;
+    let tries = 0;
+    do {
+      cell = { x: Math.floor(Math.random()*COLS), y: Math.floor(Math.random()*ROWS) };
+      tries++;
+    } while (exclude.some(c => c && c.x === cell.x && c.y === cell.y) && tries < 500);
+    return cell;
+  }
+
+  function spawnFood(){
+    const exclude = [...snake, ...obstacles];
+    if (powerUp) exclude.push(powerUp);
+    food = randCell(exclude);
+  }
+
+  function spawnObstacles(count){
+    obstacles = [];
+    for (let i=0;i<count;i++){
+      const exclude = [...snake, ...obstacles];
+      if (food) exclude.push(food);
+      obstacles.push(randCell(exclude));
+    }
+  }
+
+  function maybeSpawnPowerUp(){
+    if (powerUp || running === false) return;
+    if (Math.random() < 0.015){
+      const type = Math.random() < 0.5 ? 'speed' : 'double';
+      const exclude = [...snake, ...obstacles];
+      if (food) exclude.push(food);
+      powerUp = { ...randCell(exclude), type };
+      clearTimeout(powerUpTimer);
+      powerUpTimer = setTimeout(() => { powerUp = null; }, 6000);
+    }
+  }
+
+  function reset(){
+    snake = [
+      {x:9,y:10},{x:8,y:10},{x:7,y:10}
+    ];
+    dir = {x:1,y:0};
+    nextDir = {x:1,y:0};
+    score = 0;
+    currentInterval = baseInterval;
+    doubleScoreUntil = 0;
+    speedBoostUntil = 0;
+    powerUp = null;
+    obstacles = [];
+    food = null;
+    clearTimeout(powerUpTimer);
+    spawnFood();
+    spawnObstacles(3);
+    scoreEl.textContent = score;
+  }
+
+  function gameOver(){
+    running = false;
+    cancelAnimationFrame(rafId);
+    if (score > best){ best = score; bestEl.textContent = best; }
+    finalScoreText.textContent = 'امتیاز: ' + score;
+    overOverlay.classList.remove('hidden');
+  }
+
+  function step(){
+    dir = nextDir;
+    const head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
+
+    // wall collision
+    if (head.x < 0 || head.x >= COLS || head.y < 0 || head.y >= ROWS){
+      gameOver(); return;
+    }
+    // self collision
+    if (snake.some(s => s.x === head.x && s.y === head.y)){
+      gameOver(); return;
+    }
+    // obstacle collision
+    if (obstacles.some(o => o.x === head.x && o.y === head.y)){
+      gameOver(); return;
+    }
+
+    snake.unshift(head);
+
+    let ate = false;
+    if (head.x === food.x && head.y === food.y){
+      const mult = Date.now() < doubleScoreUntil ? 2 : 1;
+      score += 10 * mult;
+      scoreEl.textContent = score;
+      spawnFood();
+      ate = true;
+      if (score > 0 && score % 100 === 0 && obstacles.length < 9){
+        const exclude = [...snake, food, ...obstacles];
+        if (powerUp) exclude.push(powerUp);
+        obstacles.push(randCell(exclude));
+      }
+    }
+
+    if (powerUp && head.x === powerUp.x && head.y === powerUp.y){
+      if (powerUp.type === 'speed'){
+        speedBoostUntil = Date.now() + 5000;
+      } else if (powerUp.type === 'double'){
+        doubleScoreUntil = Date.now() + 8000;
+      }
+      powerUp = null;
+      clearTimeout(powerUpTimer);
+    }
+
+    if (!ate){
+      snake.pop();
+    }
+
+    currentInterval = Date.now() < speedBoostUntil ? baseInterval * 0.55 : baseInterval;
+    maybeSpawnPowerUp();
+  }
+
+  function pathRoundedRect(x, y, w, h, r){
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.arcTo(x + w, y, x + w, y + r, r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+    ctx.lineTo(x + r, y + h);
+    ctx.arcTo(x, y + h, x, y + h - r, r);
+    ctx.lineTo(x, y + r);
+    ctx.arcTo(x, y, x + r, y, r);
+    ctx.closePath();
+  }
+
+  function drawGlowCell(cell, color, glow){
+    const x = cell.x * CELL, y = cell.y * CELL;
+    ctx.save();
+    ctx.shadowColor = color;
+    ctx.shadowBlur = glow;
+    ctx.fillStyle = color;
+    pathRoundedRect(x+2, y+2, CELL-4, CELL-4, 4);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    // grid
+    ctx.strokeStyle = COLORS.gridLine;
+    ctx.lineWidth = 1;
+    for(let i=0;i<=COLS;i++){
+      ctx.beginPath(); ctx.moveTo(i*CELL,0); ctx.lineTo(i*CELL,canvas.height); ctx.stroke();
+    }
+    for(let j=0;j<=ROWS;j++){
+      ctx.beginPath(); ctx.moveTo(0,j*CELL); ctx.lineTo(canvas.width,j*CELL); ctx.stroke();
+    }
+
+    obstacles.forEach(o => drawGlowCell(o, COLORS.obstacle, 8));
+    drawGlowCell(food, COLORS.food, 14);
+    if (powerUp){
+      drawGlowCell(powerUp, powerUp.type === 'speed' ? COLORS.speed : COLORS.double, 16);
+    }
+
+    snake.forEach((s,i) => {
+      drawGlowCell(s, i === 0 ? COLORS.snakeHead : COLORS.snakeBody, i === 0 ? 12 : 5);
+    });
+  }
+
+  function loop(ts){
+    if (!running) return;
+    if (ts - lastStep >= currentInterval){
+      lastStep = ts;
+      step();
+    }
+    draw();
+    rafId = requestAnimationFrame(loop);
+  }
+
+  function start(){
+    reset();
+    running = true;
+    startOverlay.classList.add('hidden');
+    overOverlay.classList.add('hidden');
+    lastStep = 0;
+    rafId = requestAnimationFrame(loop);
+  }
+
+  // input
+  const KEY_DIR = {
+    ArrowUp:{x:0,y:-1}, ArrowDown:{x:0,y:1}, ArrowLeft:{x:-1,y:0}, ArrowRight:{x:1,y:0},
+    w:{x:0,y:-1}, s:{x:0,y:1}, a:{x:-1,y:0}, d:{x:1,y:0}
+  };
+  function trySetDir(d){
+    if (!d) return;
+    if (d.x === -dir.x && d.y === -dir.y) return; // no 180 turn
+    nextDir = d;
+  }
+  window.addEventListener('keydown', e => {
+    if (KEY_DIR[e.key]){ e.preventDefault(); trySetDir(KEY_DIR[e.key]); }
+  });
+
+  const joystickBase = document.getElementById('joystickBase');
+  const joystickStick = document.getElementById('joystickStick');
+  const JOY_RADIUS = 45; // how far the stick can travel from center, in px
+
+  function handleJoystick(clientX, clientY){
+    const rect = joystickBase.getBoundingClientRect();
+    const cx = rect.left + rect.width/2;
+    const cy = rect.top + rect.height/2;
+    let dx = clientX - cx;
+    let dy = clientY - cy;
+
+    const dist = Math.min(Math.hypot(dx,dy), JOY_RADIUS);
+    const angle = Math.atan2(dy,dx);
+    joystickStick.style.transform =
+      `translate(${-50 + (Math.cos(angle)*dist/JOY_RADIUS)*45}%, ${-50 + (Math.sin(angle)*dist/JOY_RADIUS)*45}%)`;
+
+    // ignore tiny movements near the center (dead zone)
+    if (Math.hypot(dx,dy) < 12) return;
+
+    // quantize the angle into the 4 cardinal directions
+    const deg = angle * 180 / Math.PI;
+    if (deg > -45 && deg <= 45) trySetDir({x:1,y:0});
+    else if (deg > 45 && deg <= 135) trySetDir({x:0,y:1});
+    else if (deg > -135 && deg <= -45) trySetDir({x:0,y:-1});
+    else trySetDir({x:-1,y:0});
+  }
+
+  function resetStick(){
+    joystickStick.style.transform = 'translate(-50%,-50%)';
+  }
+
+  let joystickActive = false;
+  joystickBase.addEventListener('pointerdown', e => {
+    joystickActive = true;
+    joystickBase.setPointerCapture(e.pointerId);
+    handleJoystick(e.clientX, e.clientY);
+  });
+  joystickBase.addEventListener('pointermove', e => {
+    if (!joystickActive) return;
+    handleJoystick(e.clientX, e.clientY);
+  });
+  joystickBase.addEventListener('pointerup', () => { joystickActive = false; resetStick(); });
+  joystickBase.addEventListener('pointercancel', () => { joystickActive = false; resetStick(); });
+
+  // swipe support directly on canvas
+  let touchStart = null;
+  canvas.addEventListener('touchstart', e => {
+    touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  }, {passive:true});
+  canvas.addEventListener('touchend', e => {
+    if (!touchStart) return;
+    const dx = e.changedTouches[0].clientX - touchStart.x;
+    const dy = e.changedTouches[0].clientY - touchStart.y;
+    if (Math.abs(dx) > Math.abs(dy)){
+      trySetDir({x: dx > 0 ? 1 : -1, y:0});
+    } else {
+      trySetDir({x:0, y: dy > 0 ? 1 : -1});
+    }
+    touchStart = null;
+  }, {passive:true});
+
+  document.getElementById('startBtn').addEventListener('click', start);
+  document.getElementById('restartBtn').addEventListener('click', start);
+
+})();
+</script>
+</body>
+</html>
