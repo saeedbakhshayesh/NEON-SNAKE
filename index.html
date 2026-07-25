@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>مار نئونی پیشرفته</title>
+<title>مار نئونی</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;800&family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
@@ -340,76 +340,7 @@
     transform:translateX(-50%) scale(1.2);
   }
 
-  /* ===== کنترل‌های لمسی جدید ===== */
-  .touch-controls {
-    position: fixed;
-    bottom: 20px;
-    left: 0;
-    right: 0;
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 50;
-    pointer-events: none;
-    gap: 20px;
-    padding: 0 10px;
-  }
-  .touch-controls.show {
-    display: flex;
-  }
-
-  /* دکمه‌های فلش */
-  .btn-pad {
-    display: grid;
-    grid-template-columns: 70px 70px 70px;
-    grid-template-rows: 70px 70px 70px;
-    gap: 6px;
-    pointer-events: auto;
-    touch-action: none;
-    background: rgba(0,0,0,0.3);
-    padding: 10px;
-    border-radius: 24px;
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(255,255,255,0.05);
-    box-shadow: 0 0 40px rgba(0,240,255,0.05);
-  }
-  .btn-pad .ctrl-btn {
-    background: rgba(0,240,255,0.08);
-    border: 1.5px solid var(--cyan);
-    border-radius: 16px;
-    color: var(--cyan);
-    font-size: 26px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.08s;
-    touch-action: none;
-    user-select: none;
-    text-shadow: 0 0 10px var(--shadow-cyan);
-    box-shadow: 0 0 15px rgba(0,240,255,0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-  }
-  .btn-pad .ctrl-btn:active {
-    transform: scale(0.85);
-    background: rgba(0,240,255,0.3);
-    box-shadow: 0 0 30px var(--shadow-cyan);
-  }
-  .btn-pad .ctrl-btn.empty {
-    background: transparent;
-    border: none;
-    box-shadow: none;
-    cursor: default;
-    pointer-events: none;
-  }
-  .btn-pad .ctrl-btn.up { grid-column: 2; grid-row: 1; }
-  .btn-pad .ctrl-btn.left { grid-column: 1; grid-row: 2; }
-  .btn-pad .ctrl-btn.down { grid-column: 2; grid-row: 3; }
-  .btn-pad .ctrl-btn.right { grid-column: 3; grid-row: 2; }
-
-  /* جوی‌استیک قابل جابجایی */
+  /* ===== جوی‌استیک ===== */
   .joystick-wrapper {
     position: fixed;
     width: 140px;
@@ -418,12 +349,8 @@
     pointer-events: auto;
     touch-action: none;
     cursor: grab;
-    opacity: 0;
-    transition: opacity 0.2s;
     user-select: none;
-  }
-  .joystick-wrapper.active {
-    opacity: 1;
+    display: block; /* همیشه نمایش داده شود */
   }
   .joystick-wrapper.dragging {
     cursor: grabbing;
@@ -489,45 +416,11 @@
   }
   .joystick-handle:active { cursor: grabbing; }
 
-  /* سوئیچ حالت کنترل */
-  .control-toggle {
-    position: fixed;
-    top: 80px;
-    right: 16px;
-    z-index: 200;
-    background: var(--panel-bg);
-    border: 1px solid var(--grid-line);
-    border-radius: 30px;
-    padding: 4px;
-    backdrop-filter: blur(8px);
-    display: flex;
-    gap: 4px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.5);
-    touch-action: none;
-    pointer-events: auto;
-  }
-  .control-toggle .toggle-btn {
-    background: transparent;
-    border: none;
-    color: var(--muted);
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-family: 'Vazirmatn', sans-serif;
-    touch-action: none;
-  }
-  .control-toggle .toggle-btn.active {
-    background: var(--cyan);
-    color: var(--bg);
-    box-shadow: 0 0 15px var(--shadow-cyan);
-  }
-  .control-toggle .toggle-btn:active { transform: scale(0.95); }
-
+  /* فقط در گوشی نمایش داده شود (اختیاری) */
   @media (hover:none) and (pointer:coarse) {
-    .touch-controls.show { display: flex; }
-    .control-toggle { display: flex; }
+    .joystick-wrapper {
+      display: block;
+    }
   }
   @media (max-width:500px){
     .title{font-size:12px;gap:8px;}
@@ -535,11 +428,8 @@
     .hud .box{min-width:50px;padding:4px 8px;font-size:8px;}
     .controls-panel{padding:4px 10px;gap:6px;}
     .controls-panel label{font-size:10px;}
-    .btn-pad { grid-template-columns: 60px 60px 60px; grid-template-rows: 60px 60px 60px; gap: 4px; padding: 8px; }
-    .btn-pad .ctrl-btn { font-size: 22px; border-radius: 12px; }
     .joystick-wrapper { width: 120px; height: 120px; }
     .joystick-stick { width: 48px; height: 48px; }
-    .control-toggle .toggle-btn { font-size: 10px; padding: 4px 10px; }
   }
 </style>
 </head>
@@ -601,26 +491,7 @@
   <span id="obstacleCount">🚧 ۳</span>
 </div>
 
-<!-- ===== کنترل‌های لمسی جدید ===== -->
-<div class="control-toggle" id="controlToggle">
-  <button class="toggle-btn active" data-mode="joystick">🕹️ جوی</button>
-  <button class="toggle-btn" data-mode="buttons">🔘 دکمه</button>
-</div>
-
-<div class="touch-controls show" id="touchControls">
-  <div class="btn-pad" id="btnPad">
-    <button class="ctrl-btn up" data-dir="up">▲</button>
-    <button class="ctrl-btn left" data-dir="left">◀</button>
-    <button class="ctrl-btn down" data-dir="down">▼</button>
-    <button class="ctrl-btn right" data-dir="right">▶</button>
-    <div class="ctrl-btn empty"></div>
-    <div class="ctrl-btn empty"></div>
-    <div class="ctrl-btn empty"></div>
-    <div class="ctrl-btn empty"></div>
-    <div class="ctrl-btn empty"></div>
-  </div>
-</div>
-
+<!-- ===== فقط جوی‌استیک (بدون دکمه‌های فلش و بدون انتخابگر) ===== -->
 <div class="joystick-wrapper" id="joystickWrapper">
   <div class="joystick-base" id="joystickBase">
     <div class="joystick-arrow up"><svg viewBox="0 0 24 24"><path d="M12 4 L20 18 L4 18 Z"/></svg></div>
@@ -655,9 +526,6 @@
   const joystickBase = document.getElementById('joystickBase');
   const joystickStick = document.getElementById('joystickStick');
   const joystickHandle = document.getElementById('joystickHandle');
-  const controlToggle = document.getElementById('controlToggle');
-  const touchControls = document.getElementById('touchControls');
-  const btnPad = document.getElementById('btnPad');
 
   // ---- تنظیمات ----
   const COLORS = { food: '#ff2ec4', speed: '#ffd60a', double: '#7cff6b', obstacle: '#ff4d4d' };
@@ -681,8 +549,7 @@
   let particles = [];
   let stars = [];
 
-  // ---- حالت کنترل ----
-  let controlMode = 'joystick'; // 'joystick' | 'buttons'
+  // ---- جوی‌استیک ----
   let joystickActive = false;
   let joystickAnchor = {x:0,y:0};
   const JOY_RADIUS = 45;
@@ -1145,71 +1012,10 @@
   });
 
   // ============================================================
-  //  کنترل‌های لمسی (جوی‌استیک + دکمه‌ها)
+  //  کنترل جوی‌استیک (بدون دکمه‌های اضافی)
   // ============================================================
 
-  // ---- دکمه‌های فلش ----
-  document.querySelectorAll('.ctrl-btn[data-dir]').forEach(btn => {
-    const dirMap = {
-      up: {x:0,y:-1},
-      down: {x:0,y:1},
-      left: {x:-1,y:0},
-      right: {x:1,y:0}
-    };
-    const startDir = (e) => {
-      e.preventDefault();
-      if(controlMode === 'buttons') trySetDir(dirMap[btn.dataset.dir]);
-    };
-    btn.addEventListener('touchstart', startDir);
-    btn.addEventListener('mousedown', startDir);
-  });
-
-  // ---- جوی‌استیک قابل جابجایی ----
-  function loadJoystickPosition(){
-    try {
-      const pos = localStorage.getItem('joystick_position');
-      if(pos){
-        const {x,y} = JSON.parse(pos);
-        joystickWrapper.style.left = x + 'px';
-        joystickWrapper.style.top = y + 'px';
-      } else {
-        // موقعیت پیش‌فرض: پایین سمت چپ
-        joystickWrapper.style.left = '20px';
-        joystickWrapper.style.top = (window.innerHeight - 160) + 'px';
-      }
-    } catch(e){
-      joystickWrapper.style.left = '20px';
-      joystickWrapper.style.top = (window.innerHeight - 160) + 'px';
-    }
-  }
-  function saveJoystickPosition(){
-    const rect = joystickWrapper.getBoundingClientRect();
-    try {
-      localStorage.setItem('joystick_position', JSON.stringify({x: rect.left, y: rect.top}));
-    } catch(e){}
-  }
-
-  // نمایش/مخفی کردن جوی‌استیک بر اساس حالت
-  function updateControlMode(mode){
-    controlMode = mode;
-    document.querySelectorAll('.toggle-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
-    if(mode === 'joystick'){
-      joystickWrapper.classList.add('active');
-      touchControls.classList.remove('show');
-    } else {
-      joystickWrapper.classList.remove('active');
-      touchControls.classList.add('show');
-    }
-  }
-
-  // کنترل حالت با دکمه‌های سوئیچ
-  document.querySelectorAll('.toggle-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      updateControlMode(btn.dataset.mode);
-    });
-  });
-
-  // جابجایی جوی‌استیک با درگ
+  // ---- جابجایی جوی‌استیک با درگ ----
   function startDrag(e){
     e.preventDefault();
     isDraggingJoystick = true;
@@ -1232,7 +1038,6 @@
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
     let left = clientX - dragOffsetX;
     let top = clientY - dragOffsetY;
-    // محدود کردن به داخل صفحه
     const wrapperSize = joystickWrapper.offsetWidth || 140;
     left = Math.max(0, Math.min(window.innerWidth - wrapperSize, left));
     top = Math.max(0, Math.min(window.innerHeight - wrapperSize, top));
@@ -1253,7 +1058,31 @@
   joystickHandle.addEventListener('mousedown', startDrag);
   joystickHandle.addEventListener('touchstart', startDrag, {passive: false});
 
-  // کنترل جوی‌استیک (حرکت)
+  // ---- ذخیره و بازیابی موقعیت جوی‌استیک ----
+  function loadJoystickPosition(){
+    try {
+      const pos = localStorage.getItem('joystick_position');
+      if(pos){
+        const {x,y} = JSON.parse(pos);
+        joystickWrapper.style.left = x + 'px';
+        joystickWrapper.style.top = y + 'px';
+      } else {
+        joystickWrapper.style.left = '20px';
+        joystickWrapper.style.top = (window.innerHeight - 160) + 'px';
+      }
+    } catch(e){
+      joystickWrapper.style.left = '20px';
+      joystickWrapper.style.top = (window.innerHeight - 160) + 'px';
+    }
+  }
+  function saveJoystickPosition(){
+    const rect = joystickWrapper.getBoundingClientRect();
+    try {
+      localStorage.setItem('joystick_position', JSON.stringify({x: rect.left, y: rect.top}));
+    } catch(e){}
+  }
+
+  // ---- کنترل حرکت جوی‌استیک ----
   function handleJoystickStart(e){
     e.preventDefault();
     const touch = e.touches ? e.touches[0] : e;
@@ -1288,12 +1117,10 @@
 
     if(Math.hypot(dx,dy) < 15) return;
     const deg = angle * 180 / Math.PI;
-    if(controlMode === 'joystick'){
-      if(deg > -45 && deg <= 45) trySetDir({x:1,y:0});
-      else if(deg > 45 && deg <= 135) trySetDir({x:0,y:1});
-      else if(deg > -135 && deg <= -45) trySetDir({x:0,y:-1});
-      else trySetDir({x:-1,y:0});
-    }
+    if(deg > -45 && deg <= 45) trySetDir({x:1,y:0});
+    else if(deg > 45 && deg <= 135) trySetDir({x:0,y:1});
+    else if(deg > -135 && deg <= -45) trySetDir({x:0,y:-1});
+    else trySetDir({x:-1,y:0});
   }
 
   // رویدادهای جوی‌استیک
@@ -1354,21 +1181,10 @@
 
   // ---- مقداردهی اولیه ----
   loadJoystickPosition();
-  // فقط در گوشی نمایش داده بشه
-  if('ontouchstart' in window || navigator.maxTouchPoints > 0){
-    joystickWrapper.classList.add('active');
-    touchControls.classList.add('show');
-    updateControlMode('joystick');
-  } else {
-    joystickWrapper.classList.remove('active');
-    touchControls.classList.remove('show');
-  }
-
   reset();
   running = false;
   draw();
 
-  // ذخیره موقعیت جوی‌استیک هنگام تغییر اندازه
   window.addEventListener('resize', saveJoystickPosition);
 })();
 </script>
