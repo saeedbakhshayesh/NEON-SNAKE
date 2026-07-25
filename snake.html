@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>مار نئونی</title>
+<title>مار نئونی پیشرفته</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;800&family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
+  /* ===== استایل‌های پایه (همان‌ها) ===== */
   :root{
     --bg:#05060a;
     --grid:#0b0f16;
@@ -17,6 +18,25 @@
     --danger:#ff4d4d;
     --text:#dfe9f2;
     --muted:#5c7089;
+    --shadow-cyan:rgba(0,240,255,0.3);
+    --shadow-magenta:rgba(255,46,196,0.3);
+    --panel-bg:rgba(11,15,22,0.7);
+    --star-color:rgba(255,255,255,0.6);
+  }
+  body.day-mode{
+    --bg:#e8edf2;
+    --grid:#d5dce3;
+    --grid-line:#b8c3ce;
+    --cyan:#0077be;
+    --magenta:#c2185b;
+    --gold:#e6a800;
+    --danger:#c62828;
+    --text:#1a1a2e;
+    --muted:#5a6a7a;
+    --shadow-cyan:rgba(0,119,190,0.2);
+    --shadow-magenta:rgba(194,24,91,0.2);
+    --panel-bg:rgba(200,210,220,0.7);
+    --star-color:rgba(0,0,0,0.15);
   }
   *{box-sizing:border-box;}
   html,body{
@@ -27,82 +47,150 @@
     font-family:'Vazirmatn',sans-serif;
     overflow:hidden;
     -webkit-tap-highlight-color:transparent;
+    transition:background 0.4s ease, color 0.3s ease;
   }
   body{
     display:flex;
     flex-direction:column;
     align-items:center;
     justify-content:flex-start;
-    padding:18px 14px 10px;
-    background:
-      radial-gradient(circle at 50% -10%, #0d1b2a 0%, var(--bg) 55%);
+    padding:10px 14px 8px;
+    background:var(--bg);
     min-height:100%;
+    position:relative;
+    transition:background 0.6s ease;
+  }
+  #starfield{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:0;
+    overflow:hidden;
+  }
+  .star{
+    position:absolute;
+    border-radius:50%;
+    background:var(--star-color);
+    transition:opacity 1.5s ease;
   }
   .title{
     font-family:'Press Start 2P',monospace;
     font-size:15px;
     letter-spacing:1px;
     color:var(--cyan);
-    text-shadow:0 0 6px var(--cyan), 0 0 18px rgba(0,240,255,.5);
-    margin:2px 0 14px;
+    text-shadow:0 0 6px var(--cyan), 0 0 18px var(--shadow-cyan);
+    margin:2px 0 8px;
     text-align:center;
     direction:ltr;
+    position:relative;
+    z-index:1;
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .title .btn-icon{
+    background:transparent;
+    border:1.5px solid var(--muted);
+    color:var(--muted);
+    border-radius:50%;
+    width:32px;
+    height:32px;
+    font-size:16px;
+    cursor:pointer;
+    transition:all 0.3s;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:0;
+  }
+  .title .btn-icon:hover{
+    border-color:var(--cyan);
+    color:var(--cyan);
+    transform:scale(1.1);
   }
   .hud{
     display:flex;
-    gap:22px;
-    margin-bottom:12px;
+    gap:8px;
+    margin-bottom:8px;
     font-family:'Press Start 2P',monospace;
     font-size:10px;
     direction:ltr;
+    flex-wrap:wrap;
+    justify-content:center;
+    z-index:1;
+    position:relative;
   }
   .hud .box{
-    background:var(--grid);
+    background:var(--panel-bg);
     border:1px solid var(--grid-line);
-    padding:8px 12px;
+    padding:5px 10px;
     border-radius:6px;
     text-align:center;
-    min-width:78px;
+    min-width:60px;
+    backdrop-filter:blur(4px);
+    transition:all 0.3s;
   }
-  .hud .box span{display:block;margin-top:5px;}
-  .hud .score span{color:var(--cyan);text-shadow:0 0 6px var(--cyan);}
+  .hud .box span{display:block;margin-top:3px;}
+  .hud .score span{color:var(--cyan);text-shadow:0 0 6px var(--shadow-cyan);}
   .hud .best span{color:var(--gold);text-shadow:0 0 6px var(--gold);}
   .hud .label{color:var(--muted);font-size:8px;}
-
+  .hud .box.power-indicator{
+    min-width:40px;
+    font-size:14px;
+    line-height:1;
+    padding:4px 8px;
+  }
+  .btn-pause{
+    background:transparent;
+    border:1.5px solid var(--muted);
+    color:var(--muted);
+    padding:5px 10px;
+    border-radius:6px;
+    font-family:'Press Start 2P',monospace;
+    font-size:8px;
+    cursor:pointer;
+    transition:all 0.3s;
+  }
+  .btn-pause:hover{color:var(--cyan);border-color:var(--cyan);}
   .board-wrap{
     position:relative;
-    border:2px solid #16324a;
+    border:2px solid var(--grid-line);
     border-radius:10px;
-    box-shadow:0 0 0 1px rgba(0,240,255,.08), 0 0 24px rgba(0,240,255,.15), inset 0 0 24px rgba(0,0,0,.6);
+    box-shadow:0 0 0 1px var(--shadow-cyan), 0 0 24px var(--shadow-cyan), inset 0 0 24px rgba(0,0,0,0.3);
     background:var(--grid);
     max-width:94vw;
+    touch-action:none;
+    transition:border-color 0.4s, box-shadow 0.4s;
+    z-index:1;
   }
   canvas{
     display:block;
     border-radius:8px;
     max-width:94vw;
     height:auto;
+    touch-action:none;
   }
-
   .overlay{
     position:absolute;
     inset:0;
-    background:rgba(3,5,9,.86);
+    background:rgba(3,5,9,0.88);
     border-radius:8px;
     display:flex;
     flex-direction:column;
     align-items:center;
     justify-content:center;
-    gap:14px;
+    gap:12px;
     text-align:center;
     padding:20px;
+    backdrop-filter:blur(3px);
+    z-index:10;
   }
   .overlay.hidden{display:none;}
   .overlay h2{
     font-family:'Press Start 2P',monospace;
     font-size:16px;
     color:var(--magenta);
-    text-shadow:0 0 8px var(--magenta), 0 0 20px rgba(255,46,196,.5);
+    text-shadow:0 0 8px var(--shadow-magenta), 0 0 20px var(--shadow-magenta);
     margin:0;
     direction:ltr;
   }
@@ -117,329 +205,849 @@
     padding:10px 26px;
     border-radius:8px;
     cursor:pointer;
-    box-shadow:0 0 10px rgba(0,240,255,.25);
-    transition:transform .12s ease, box-shadow .12s ease;
+    box-shadow:0 0 10px var(--shadow-cyan);
+    transition:transform 0.12s ease, box-shadow 0.12s ease;
   }
-  .btn:hover{box-shadow:0 0 18px rgba(0,240,255,.55);}
-  .btn:active{transform:scale(.96);}
-
-  .legend{
+  .btn:hover{box-shadow:0 0 18px var(--shadow-cyan);}
+  .btn:active{transform:scale(0.96);}
+  .controls-panel{
     display:flex;
-    gap:14px;
+    align-items:center;
+    gap:10px;
+    margin-top:6px;
+    background:var(--panel-bg);
+    border:1px solid var(--grid-line);
+    border-radius:8px;
+    padding:5px 12px;
+    backdrop-filter:blur(4px);
     flex-wrap:wrap;
     justify-content:center;
-    margin-top:12px;
+    z-index:1;
+    transition:all 0.3s;
+  }
+  .controls-panel label{
+    color:var(--muted);
     font-size:11px;
+    display:flex;
+    align-items:center;
+    gap:4px;
+  }
+  .controls-panel input[type="text"]{
+    width:26px;
+    height:26px;
+    background:var(--grid);
+    border:1px solid var(--grid-line);
+    border-radius:4px;
+    color:var(--text);
+    font-size:15px;
+    text-align:center;
+    font-weight:bold;
+    padding:0;
+  }
+  .controls-panel input[type="color"]{
+    width:30px;
+    height:30px;
+    border:none;
+    background:transparent;
+    cursor:pointer;
+    padding:0;
+    border-radius:4px;
+  }
+  .controls-panel input[type="color"]::-webkit-color-swatch-wrapper{padding:0;}
+  .controls-panel input[type="color"]::-webkit-color-swatch{border:1px solid var(--grid-line);border-radius:4px;}
+  .controls-panel select{
+    background:var(--grid);
+    color:var(--text);
+    border:1px solid var(--grid-line);
+    border-radius:4px;
+    padding:3px 5px;
+    font-size:11px;
+    font-family:'Vazirmatn',sans-serif;
+  }
+  .filter-btns{
+    display:flex;
+    gap:4px;
+  }
+  .filter-btns .fbtn{
+    background:transparent;
+    border:1px solid var(--grid-line);
+    color:var(--muted);
+    border-radius:4px;
+    padding:3px 7px;
+    font-size:9px;
+    cursor:pointer;
+    transition:all 0.2s;
+    font-family:'Vazirmatn',sans-serif;
+  }
+  .filter-btns .fbtn.active{
+    border-color:var(--cyan);
+    color:var(--cyan);
+    box-shadow:0 0 8px var(--shadow-cyan);
+  }
+  .filter-btns .fbtn:hover{border-color:var(--text);}
+  .legend{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    justify-content:center;
+    margin-top:4px;
+    font-size:10px;
     color:var(--muted);
     max-width:340px;
+    z-index:1;
   }
-  .legend span{display:inline-flex;align-items:center;gap:5px;}
-  .dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
-  .dot.food{background:var(--magenta);box-shadow:0 0 6px var(--magenta);}
+  .legend span{display:inline-flex;align-items:center;gap:4px;}
+  .dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+  .dot.food{background:var(--magenta);box-shadow:0 0 6px var(--shadow-magenta);}
   .dot.speed{background:var(--gold);box-shadow:0 0 6px var(--gold);}
   .dot.double{background:#7cff6b;box-shadow:0 0 6px #7cff6b;}
   .dot.obstacle{background:var(--danger);box-shadow:0 0 6px var(--danger);}
-
-  .touch-zone{
-    display:none;
-    position:relative;
+  .progress-wrap{
     width:100%;
     max-width:360px;
-    height:200px;
-    margin-top:14px;
-    border-radius:14px;
-    background:linear-gradient(180deg, rgba(13,23,35,.35), rgba(13,23,35,.1));
-    border:1px dashed var(--grid-line);
-    touch-action:none;
+    height:4px;
+    background:var(--grid-line);
+    border-radius:4px;
+    margin-top:3px;
     overflow:hidden;
+    z-index:1;
+    position:relative;
   }
-  .touch-zone-hint{
-    position:absolute;
-    inset:0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    color:var(--muted);
-    font-size:12px;
-    text-align:center;
-    padding:0 24px;
-    pointer-events:none;
+  .progress-bar{
+    height:100%;
+    width:0%;
+    background:linear-gradient(90deg, var(--cyan), var(--magenta));
+    border-radius:4px;
+    transition:width 0.3s ease;
   }
-  .joystick-base{
+  .combo-text{
     position:absolute;
-    width:130px;
-    height:130px;
-    border-radius:50%;
-    background:radial-gradient(circle at 50% 45%, #0d1723 0%, var(--grid) 70%);
-    border:1.5px solid var(--grid-line);
-    box-shadow:0 0 0 1px rgba(0,240,255,.08), 0 0 20px rgba(0,240,255,.12), inset 0 0 18px rgba(0,0,0,.6);
-    opacity:0;
-    pointer-events:none;
-    transition:opacity .12s ease;
-  }
-  .joystick-base.active{opacity:1;}
-  .joystick-arrow{
-    position:absolute;
-    color:var(--muted);
-    pointer-events:none;
-    line-height:0;
-  }
-  .joystick-arrow svg{display:block;}
-  .joystick-arrow.right svg{transform:rotate(90deg);}
-  .joystick-arrow.down svg{transform:rotate(180deg);}
-  .joystick-arrow.left svg{transform:rotate(270deg);}
-  .joystick-arrow.up{top:9px;left:50%;transform:translateX(-50%);}
-  .joystick-arrow.down{bottom:9px;left:50%;transform:translateX(-50%);}
-  .joystick-arrow.left{left:9px;top:50%;transform:translateY(-50%);}
-  .joystick-arrow.right{right:9px;top:50%;transform:translateY(-50%);}
-  .joystick-stick{
-    position:absolute;
-    width:52px;
-    height:52px;
-    border-radius:50%;
-    top:50%;
+    top:20%;
     left:50%;
-    background:radial-gradient(circle at 35% 30%, #1a2733 0%, var(--grid) 75%);
-    border:1.5px solid var(--cyan);
-    box-shadow:0 0 12px rgba(0,240,255,.4);
-    transform:translate(-50%,-50%);
-    transition:transform .08s ease;
+    transform:translateX(-50%);
+    font-family:'Press Start 2P',monospace;
+    font-size:22px;
+    color:var(--gold);
+    text-shadow:0 0 20px var(--gold), 0 0 40px var(--gold);
     pointer-events:none;
+    opacity:0;
+    z-index:20;
+    transition:all 0.5s ease;
+    direction:ltr;
+  }
+  .combo-text.show{
+    opacity:1;
+    transform:translateX(-50%) scale(1.2);
   }
 
-  @media (hover:none) and (pointer:coarse){
-    .touch-zone{display:block;}
+  /* ===== کنترل‌های لمسی جدید ===== */
+  .touch-controls {
+    position: fixed;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 50;
+    pointer-events: none;
+    gap: 20px;
+    padding: 0 10px;
+  }
+  .touch-controls.show {
+    display: flex;
+  }
+
+  /* دکمه‌های فلش */
+  .btn-pad {
+    display: grid;
+    grid-template-columns: 70px 70px 70px;
+    grid-template-rows: 70px 70px 70px;
+    gap: 6px;
+    pointer-events: auto;
+    touch-action: none;
+    background: rgba(0,0,0,0.3);
+    padding: 10px;
+    border-radius: 24px;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.05);
+    box-shadow: 0 0 40px rgba(0,240,255,0.05);
+  }
+  .btn-pad .ctrl-btn {
+    background: rgba(0,240,255,0.08);
+    border: 1.5px solid var(--cyan);
+    border-radius: 16px;
+    color: var(--cyan);
+    font-size: 26px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.08s;
+    touch-action: none;
+    user-select: none;
+    text-shadow: 0 0 10px var(--shadow-cyan);
+    box-shadow: 0 0 15px rgba(0,240,255,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+  }
+  .btn-pad .ctrl-btn:active {
+    transform: scale(0.85);
+    background: rgba(0,240,255,0.3);
+    box-shadow: 0 0 30px var(--shadow-cyan);
+  }
+  .btn-pad .ctrl-btn.empty {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    cursor: default;
+    pointer-events: none;
+  }
+  .btn-pad .ctrl-btn.up { grid-column: 2; grid-row: 1; }
+  .btn-pad .ctrl-btn.left { grid-column: 1; grid-row: 2; }
+  .btn-pad .ctrl-btn.down { grid-column: 2; grid-row: 3; }
+  .btn-pad .ctrl-btn.right { grid-column: 3; grid-row: 2; }
+
+  /* جوی‌استیک قابل جابجایی */
+  .joystick-wrapper {
+    position: fixed;
+    width: 140px;
+    height: 140px;
+    z-index: 100;
+    pointer-events: auto;
+    touch-action: none;
+    cursor: grab;
+    opacity: 0;
+    transition: opacity 0.2s;
+    user-select: none;
+  }
+  .joystick-wrapper.active {
+    opacity: 1;
+  }
+  .joystick-wrapper.dragging {
+    cursor: grabbing;
+    opacity: 0.85;
+  }
+  .joystick-base {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 45%, #0d1723 0%, var(--grid) 70%);
+    border: 2px solid var(--grid-line);
+    box-shadow: 0 0 0 1px var(--shadow-cyan), 0 0 30px rgba(0,240,255,0.15), inset 0 0 30px rgba(0,0,0,0.6);
+    position: relative;
+    touch-action: none;
+    pointer-events: auto;
+  }
+  .joystick-arrow {
+    position: absolute;
+    color: var(--muted);
+    pointer-events: none;
+    line-height: 0;
+  }
+  .joystick-arrow svg { display: block; width: 16px; height: 16px; fill: currentColor; }
+  .joystick-arrow.right svg { transform: rotate(90deg); }
+  .joystick-arrow.down svg { transform: rotate(180deg); }
+  .joystick-arrow.left svg { transform: rotate(270deg); }
+  .joystick-arrow.up { top: 12px; left: 50%; transform: translateX(-50%); }
+  .joystick-arrow.down { bottom: 12px; left: 50%; transform: translateX(-50%); }
+  .joystick-arrow.left { left: 12px; top: 50%; transform: translateY(-50%); }
+  .joystick-arrow.right { right: 12px; top: 50%; transform: translateY(-50%); }
+  .joystick-stick {
+    position: absolute;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    background: radial-gradient(circle at 35% 30%, #1a2733 0%, var(--grid) 75%);
+    border: 2px solid var(--cyan);
+    box-shadow: 0 0 20px var(--shadow-cyan);
+    transform: translate(-50%, -50%);
+    transition: transform 0.08s ease;
+    pointer-events: none;
+  }
+  .joystick-handle {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 24px;
+    height: 24px;
+    background: rgba(0,240,255,0.2);
+    border-radius: 50%;
+    border: 1px solid var(--cyan);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: var(--cyan);
+    cursor: grab;
+    touch-action: none;
+    pointer-events: auto;
+    box-shadow: 0 0 10px var(--shadow-cyan);
+  }
+  .joystick-handle:active { cursor: grabbing; }
+
+  /* سوئیچ حالت کنترل */
+  .control-toggle {
+    position: fixed;
+    top: 80px;
+    right: 16px;
+    z-index: 200;
+    background: var(--panel-bg);
+    border: 1px solid var(--grid-line);
+    border-radius: 30px;
+    padding: 4px;
+    backdrop-filter: blur(8px);
+    display: flex;
+    gap: 4px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    touch-action: none;
+    pointer-events: auto;
+  }
+  .control-toggle .toggle-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Vazirmatn', sans-serif;
+    touch-action: none;
+  }
+  .control-toggle .toggle-btn.active {
+    background: var(--cyan);
+    color: var(--bg);
+    box-shadow: 0 0 15px var(--shadow-cyan);
+  }
+  .control-toggle .toggle-btn:active { transform: scale(0.95); }
+
+  @media (hover:none) and (pointer:coarse) {
+    .touch-controls.show { display: flex; }
+    .control-toggle { display: flex; }
+  }
+  @media (max-width:500px){
+    .title{font-size:12px;gap:8px;}
+    .title .btn-icon{width:28px;height:28px;font-size:14px;}
+    .hud .box{min-width:50px;padding:4px 8px;font-size:8px;}
+    .controls-panel{padding:4px 10px;gap:6px;}
+    .controls-panel label{font-size:10px;}
+    .btn-pad { grid-template-columns: 60px 60px 60px; grid-template-rows: 60px 60px 60px; gap: 4px; padding: 8px; }
+    .btn-pad .ctrl-btn { font-size: 22px; border-radius: 12px; }
+    .joystick-wrapper { width: 120px; height: 120px; }
+    .joystick-stick { width: 48px; height: 48px; }
+    .control-toggle .toggle-btn { font-size: 10px; padding: 4px 10px; }
   }
 </style>
 </head>
 <body>
-
-  <div class="title">NEON SNAKE</div>
-
-  <div class="hud">
-    <div class="box score"><span class="label">امتیاز</span><span id="score">0</span></div>
-    <div class="box best"><span class="label">بهترین</span><span id="best">0</span></div>
+<div id="starfield"></div>
+<div class="title">
+  <span>NEON SNAKE</span>
+  <button class="btn-icon" id="themeToggle" title="تغییر تم">🌙</button>
+  <button class="btn-icon" id="fullscreenBtn" title="تمام‌صفحه">⛶</button>
+</div>
+<div class="hud">
+  <div class="box score"><span class="label">امتیاز</span><span id="score">0</span></div>
+  <div class="box best"><span class="label">بهترین</span><span id="best">0</span></div>
+  <div class="box power-indicator" id="powerIcon">⚡</div>
+  <button class="btn-pause" id="pauseBtn">⏸ توقف</button>
+</div>
+<div class="board-wrap">
+  <canvas id="board" width="360" height="360"></canvas>
+  <div class="combo-text" id="comboText">🔥 COMBO!</div>
+  <div class="overlay" id="startOverlay">
+    <h2>NEON SNAKE</h2>
+    <p>حرکت با فلش‌ها یا WASD • غذا بخور • پاورآپ بگیر • تا جایی که می‌تونی دوام بیار!</p>
+    <button class="btn" id="startBtn">شروع بازی</button>
   </div>
-
-  <div class="board-wrap">
-    <canvas id="board" width="360" height="360"></canvas>
-
-    <div class="overlay" id="startOverlay">
-      <h2>NEON SNAKE</h2>
-      <p>با فلش‌ها یا لمس حرکت کن، غذا بخور، مراقب موانع باش و پاور-آپ‌ها رو شکار کن.</p>
-      <button class="btn" id="startBtn">شروع بازی</button>
-    </div>
-
-    <div class="overlay hidden" id="overOverlay">
-      <h2>GAME OVER</h2>
-      <p id="finalScoreText">امتیاز: 0</p>
-      <button class="btn" id="restartBtn">دوباره بازی کن</button>
-    </div>
+  <div class="overlay hidden" id="overOverlay">
+    <h2>GAME OVER</h2>
+    <p id="finalScoreText">امتیاز: 0</p>
+    <button class="btn" id="restartBtn">دوباره بازی کن</button>
   </div>
-
-  <div class="legend">
-    <span><i class="dot food"></i> غذا</span>
-    <span><i class="dot speed"></i> سرعت</span>
-    <span><i class="dot double"></i> امتیاز دوبل</span>
-    <span><i class="dot obstacle"></i> مانع</span>
+  <div class="overlay hidden" id="pauseOverlay">
+    <h2 style="color:var(--cyan);text-shadow:0 0 8px var(--shadow-cyan);">⏸ توقف</h2>
+    <p>بازی موقتاً متوقف شده.</p>
   </div>
-
-  <div class="touch-zone" id="touchZone">
-    <div class="touch-zone-hint">هر جای این ناحیه رو لمس کن و بکش</div>
-    <div class="joystick-base" id="joystickBase">
-      <div class="joystick-arrow up"><svg viewBox="0 0 24 24" width="14" height="14"><path d="M12 4 L20 18 L4 18 Z" fill="currentColor"/></svg></div>
-      <div class="joystick-arrow right"><svg viewBox="0 0 24 24" width="14" height="14"><path d="M12 4 L20 18 L4 18 Z" fill="currentColor"/></svg></div>
-      <div class="joystick-arrow down"><svg viewBox="0 0 24 24" width="14" height="14"><path d="M12 4 L20 18 L4 18 Z" fill="currentColor"/></svg></div>
-      <div class="joystick-arrow left"><svg viewBox="0 0 24 24" width="14" height="14"><path d="M12 4 L20 18 L4 18 Z" fill="currentColor"/></svg></div>
-      <div class="joystick-stick" id="joystickStick"></div>
-    </div>
+</div>
+<div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+<div class="controls-panel">
+  <label>حرف: <input type="text" id="skinLetter" maxlength="1" value="M"></label>
+  <label>رنگ: <input type="color" id="skinColor" value="#00f0ff"></label>
+  <label>طرح:
+    <select id="skinPattern">
+      <option value="simple">ساده</option>
+      <option value="dotted">خال‌خالی</option>
+      <option value="striped">خط‌چین</option>
+      <option value="checkered">شطرنجی</option>
+    </select>
+  </label>
+  <div class="filter-btns">
+    <button class="fbtn active" data-filter="normal">نرمال</button>
+    <button class="fbtn" data-filter="cinema">سینمایی</button>
+    <button class="fbtn" data-filter="neon">نئون</button>
+    <button class="fbtn" data-filter="mono">تک‌رنگ</button>
   </div>
+</div>
+<div class="legend">
+  <span><i class="dot food"></i> غذا</span>
+  <span><i class="dot speed"></i> سرعت</span>
+  <span><i class="dot double"></i> دوبل</span>
+  <span><i class="dot obstacle"></i> مانع</span>
+  <span id="obstacleCount">🚧 ۳</span>
+</div>
+
+<!-- ===== کنترل‌های لمسی جدید ===== -->
+<div class="control-toggle" id="controlToggle">
+  <button class="toggle-btn active" data-mode="joystick">🕹️ جوی</button>
+  <button class="toggle-btn" data-mode="buttons">🔘 دکمه</button>
+</div>
+
+<div class="touch-controls show" id="touchControls">
+  <div class="btn-pad" id="btnPad">
+    <button class="ctrl-btn up" data-dir="up">▲</button>
+    <button class="ctrl-btn left" data-dir="left">◀</button>
+    <button class="ctrl-btn down" data-dir="down">▼</button>
+    <button class="ctrl-btn right" data-dir="right">▶</button>
+    <div class="ctrl-btn empty"></div>
+    <div class="ctrl-btn empty"></div>
+    <div class="ctrl-btn empty"></div>
+    <div class="ctrl-btn empty"></div>
+    <div class="ctrl-btn empty"></div>
+  </div>
+</div>
+
+<div class="joystick-wrapper" id="joystickWrapper">
+  <div class="joystick-base" id="joystickBase">
+    <div class="joystick-arrow up"><svg viewBox="0 0 24 24"><path d="M12 4 L20 18 L4 18 Z"/></svg></div>
+    <div class="joystick-arrow right"><svg viewBox="0 0 24 24"><path d="M12 4 L20 18 L4 18 Z"/></svg></div>
+    <div class="joystick-arrow down"><svg viewBox="0 0 24 24"><path d="M12 4 L20 18 L4 18 Z"/></svg></div>
+    <div class="joystick-arrow left"><svg viewBox="0 0 24 24"><path d="M12 4 L20 18 L4 18 Z"/></svg></div>
+    <div class="joystick-stick" id="joystickStick"></div>
+    <div class="joystick-handle" id="joystickHandle">⣿</div>
+  </div>
+</div>
 
 <script>
 (function(){
+  // ---- عناصر ----
   const canvas = document.getElementById('board');
   const ctx = canvas.getContext('2d');
-
-  const COLS = 20, ROWS = 20;
-  const CELL = canvas.width / COLS;
-
-  const COLORS = {
-    snakeHead: '#00f0ff',
-    snakeBody: '#00b3c4',
-    food: '#ff2ec4',
-    speed: '#ffd60a',
-    double: '#7cff6b',
-    obstacle: '#ff4d4d',
-    gridLine: 'rgba(255,255,255,0.03)'
-  };
-
   const scoreEl = document.getElementById('score');
   const bestEl = document.getElementById('best');
   const startOverlay = document.getElementById('startOverlay');
   const overOverlay = document.getElementById('overOverlay');
+  const pauseOverlay = document.getElementById('pauseOverlay');
   const finalScoreText = document.getElementById('finalScoreText');
+  const pauseBtn = document.getElementById('pauseBtn');
+  const progressBar = document.getElementById('progressBar');
+  const comboText = document.getElementById('comboText');
+  const powerIcon = document.getElementById('powerIcon');
+  const obstacleCountEl = document.getElementById('obstacleCount');
+  const themeToggle = document.getElementById('themeToggle');
+  const fullscreenBtn = document.getElementById('fullscreenBtn');
 
-  let best = 0; // in-memory only (no localStorage available in this environment)
+  const joystickWrapper = document.getElementById('joystickWrapper');
+  const joystickBase = document.getElementById('joystickBase');
+  const joystickStick = document.getElementById('joystickStick');
+  const joystickHandle = document.getElementById('joystickHandle');
+  const controlToggle = document.getElementById('controlToggle');
+  const touchControls = document.getElementById('touchControls');
+  const btnPad = document.getElementById('btnPad');
 
+  // ---- تنظیمات ----
+  const COLORS = { food: '#ff2ec4', speed: '#ffd60a', double: '#7cff6b', obstacle: '#ff4d4d' };
+  const COLS = 20, ROWS = 20;
+  const CELL = canvas.width / COLS;
+  let best = 0;
+  let skin = { letter: 'M', color: '#00f0ff', pattern: 'simple' };
+  let currentFilter = 'normal';
+  let isDay = false;
+
+  // ---- متغیرهای بازی ----
   let snake, dir, nextDir, food, obstacles, powerUp, score;
-  const START_INTERVAL = 230; // ms per step at game start (slower, easier ramp-in)
-  const MIN_INTERVAL = 110;   // fastest the base speed is allowed to reach
-  let levelInterval = START_INTERVAL;
+  let levelInterval = 230;
+  const MIN_INTERVAL = 110;
   let currentInterval = levelInterval;
   let lastStep = 0;
-  let running = false;
-  let doubleScoreUntil = 0;
-  let speedBoostUntil = 0;
-  let powerUpTimer = null;
-  let rafId = null;
+  let running = false, paused = false;
+  let doubleScoreUntil = 0, speedBoostUntil = 0;
+  let powerUpTimer = null, rafId = null;
+  let comboCount = 0;
+  let particles = [];
+  let stars = [];
 
+  // ---- حالت کنترل ----
+  let controlMode = 'joystick'; // 'joystick' | 'buttons'
+  let joystickActive = false;
+  let joystickAnchor = {x:0,y:0};
+  const JOY_RADIUS = 45;
+  let isDraggingJoystick = false;
+  let dragOffsetX = 0, dragOffsetY = 0;
+
+  // ---- best از localStorage ----
+  function loadBest(){
+    try { const s = localStorage.getItem('neon_snake_best'); best = s ? parseInt(s,10) : 0; } catch(e){ best=0; }
+    bestEl.textContent = best;
+  }
+  function saveBest(){ try { localStorage.setItem('neon_snake_best', String(best)); } catch(e){} }
+  loadBest();
+
+  // ---- ستاره‌ها ----
+  function initStars(){
+    const container = document.getElementById('starfield');
+    container.innerHTML = '';
+    stars = [];
+    for(let i=0;i<50;i++){
+      const el = document.createElement('div');
+      el.className = 'star';
+      const size = 1 + Math.random() * 3;
+      const x = Math.random() * 100;
+      const y = Math.random() * 100;
+      const delay = Math.random() * 3;
+      const duration = 1.5 + Math.random() * 3;
+      el.style.cssText = `
+        width:${size}px; height:${size}px;
+        left:${x}%; top:${y}%;
+        animation: twinkle ${duration}s ease-in-out ${delay}s infinite alternate;
+        opacity:${0.2 + Math.random() * 0.5};
+      `;
+      container.appendChild(el);
+      stars.push({ el, baseOpacity: 0.2 + Math.random() * 0.5, duration, delay });
+    }
+    if(!document.getElementById('starStyle')){
+      const style = document.createElement('style');
+      style.id = 'starStyle';
+      style.textContent = `
+        @keyframes twinkle {
+          0% { opacity: 0.15; transform: scale(0.8); }
+          100% { opacity: 0.9; transform: scale(1.2); }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  }
+  initStars();
+
+  // ---- توابع اصلی بازی (همان‌ها) ----
   function randCell(exclude){
-    let cell;
-    let tries = 0;
-    do {
-      cell = { x: Math.floor(Math.random()*COLS), y: Math.floor(Math.random()*ROWS) };
-      tries++;
-    } while (exclude.some(c => c && c.x === cell.x && c.y === cell.y) && tries < 500);
-    return cell;
+    const total = COLS * ROWS;
+    const free = [];
+    for(let i=0;i<total;i++){
+      const x = i % COLS, y = Math.floor(i / COLS);
+      if(!exclude.some(c => c && c.x === x && c.y === y)) free.push({x,y});
+    }
+    if(free.length === 0) return { x:Math.floor(Math.random()*COLS), y:Math.floor(Math.random()*ROWS) };
+    return free[Math.floor(Math.random() * free.length)];
   }
 
   function spawnFood(){
     const exclude = [...snake, ...obstacles];
-    if (powerUp) exclude.push(powerUp);
+    if(powerUp) exclude.push(powerUp);
     food = randCell(exclude);
   }
 
   function spawnObstacles(count){
     obstacles = [];
-    for (let i=0;i<count;i++){
+    for(let i=0;i<count;i++){
       const exclude = [...snake, ...obstacles];
-      if (food) exclude.push(food);
+      if(food) exclude.push(food);
+      if(powerUp) exclude.push(powerUp);
       obstacles.push(randCell(exclude));
     }
+    obstacleCountEl.textContent = `🚧 ${obstacles.length}`;
   }
 
   function maybeSpawnPowerUp(){
-    if (powerUp || running === false) return;
-    if (Math.random() < 0.015){
+    if(powerUp || !running || paused) return;
+    if(Math.random() < 0.015){
       const type = Math.random() < 0.5 ? 'speed' : 'double';
       const exclude = [...snake, ...obstacles];
-      if (food) exclude.push(food);
+      if(food) exclude.push(food);
       powerUp = { ...randCell(exclude), type };
       clearTimeout(powerUpTimer);
       powerUpTimer = setTimeout(() => { powerUp = null; }, 6000);
     }
+    updatePowerIcon();
+  }
+
+  function updatePowerIcon(){
+    if(doubleScoreUntil > Date.now()) powerIcon.textContent = '💎';
+    else if(speedBoostUntil > Date.now()) powerIcon.textContent = '⚡';
+    else if(powerUp) powerIcon.textContent = '✨';
+    else powerIcon.textContent = '⚡';
   }
 
   function reset(){
-    snake = [
-      {x:9,y:10},{x:8,y:10},{x:7,y:10}
-    ];
-    dir = {x:1,y:0};
-    nextDir = {x:1,y:0};
-    score = 0;
-    levelInterval = START_INTERVAL;
-    currentInterval = levelInterval;
-    doubleScoreUntil = 0;
-    speedBoostUntil = 0;
-    powerUp = null;
-    obstacles = [];
-    food = null;
+    snake = [{x:9,y:10},{x:8,y:10},{x:7,y:10}];
+    dir = {x:1,y:0}; nextDir = {x:1,y:0};
+    score = 0; comboCount = 0;
+    levelInterval = 230; currentInterval = 230;
+    doubleScoreUntil = 0; speedBoostUntil = 0;
+    powerUp = null; obstacles = []; food = null;
+    particles = [];
     clearTimeout(powerUpTimer);
     spawnFood();
     spawnObstacles(3);
     scoreEl.textContent = score;
+    progressBar.style.width = '0%';
+    paused = false;
+    pauseOverlay.classList.add('hidden');
+    pauseBtn.textContent = '⏸ توقف';
+    comboText.classList.remove('show');
+    updatePowerIcon();
   }
 
   function gameOver(){
     running = false;
     cancelAnimationFrame(rafId);
-    if (score > best){ best = score; bestEl.textContent = best; }
+    if(score > best){ best = score; bestEl.textContent = best; saveBest(); }
     finalScoreText.textContent = 'امتیاز: ' + score;
     overOverlay.classList.remove('hidden');
+    pauseBtn.textContent = '⏸ توقف';
+    for(let i=0;i<40;i++){
+      particles.push({
+        x: canvas.width/2 + (Math.random()-0.5)*60,
+        y: canvas.height/2 + (Math.random()-0.5)*60,
+        vx: (Math.random()-0.5)*8,
+        vy: (Math.random()-0.5)*8 - 2,
+        life: 1,
+        decay: 0.008 + Math.random()*0.015,
+        color: ['#ff2ec4','#00f0ff','#ffd60a','#ff4d4d'][Math.floor(Math.random()*4)],
+        size: 3 + Math.random()*5
+      });
+    }
   }
 
   function step(){
+    if(paused) return;
     dir = nextDir;
     const head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
 
-    // wall collision
-    if (head.x < 0 || head.x >= COLS || head.y < 0 || head.y >= ROWS){
+    if(head.x < 0 || head.x >= COLS || head.y < 0 || head.y >= ROWS){
       gameOver(); return;
     }
-    // self collision
-    if (snake.some(s => s.x === head.x && s.y === head.y)){
+    if(snake.some(s => s.x === head.x && s.y === head.y)){
       gameOver(); return;
     }
-    // obstacle collision
-    if (obstacles.some(o => o.x === head.x && o.y === head.y)){
+    if(obstacles.some(o => o.x === head.x && o.y === head.y)){
       gameOver(); return;
     }
 
     snake.unshift(head);
 
     let ate = false;
-    if (head.x === food.x && head.y === food.y){
+    if(head.x === food.x && head.y === food.y){
       const mult = Date.now() < doubleScoreUntil ? 2 : 1;
       score += 10 * mult;
       scoreEl.textContent = score;
+      spawnParticles(head.x * CELL + CELL/2, head.y * CELL + CELL/2, COLORS.food, 30);
       spawnFood();
       ate = true;
-      levelInterval = Math.max(MIN_INTERVAL, levelInterval - 2); // slight speed-up each food eaten
-      if (score > 0 && score % 100 === 0 && obstacles.length < 9){
+      comboCount++;
+      if(comboCount >= 3) showCombo(comboCount);
+      levelInterval = Math.max(MIN_INTERVAL, levelInterval - 2);
+      if(score > 0 && score % 100 === 0 && obstacles.length < 9){
         const exclude = [...snake, food, ...obstacles];
-        if (powerUp) exclude.push(powerUp);
+        if(powerUp) exclude.push(powerUp);
         obstacles.push(randCell(exclude));
+        obstacleCountEl.textContent = `🚧 ${obstacles.length}`;
       }
+      const progress = ((score % 100) / 100) * 100;
+      progressBar.style.width = progress + '%';
+    } else {
+      comboCount = 0;
+      comboText.classList.remove('show');
     }
 
-    if (powerUp && head.x === powerUp.x && head.y === powerUp.y){
-      if (powerUp.type === 'speed'){
+    if(powerUp && head.x === powerUp.x && head.y === powerUp.y){
+      if(powerUp.type === 'speed'){
         speedBoostUntil = Date.now() + 5000;
-      } else if (powerUp.type === 'double'){
+        spawnParticles(head.x * CELL + CELL/2, head.y * CELL + CELL/2, COLORS.speed, 40);
+      } else if(powerUp.type === 'double'){
         doubleScoreUntil = Date.now() + 8000;
+        spawnParticles(head.x * CELL + CELL/2, head.y * CELL + CELL/2, COLORS.double, 40);
       }
       powerUp = null;
       clearTimeout(powerUpTimer);
+      updatePowerIcon();
     }
 
-    if (!ate){
-      snake.pop();
-    }
+    if(!ate) snake.pop();
 
     currentInterval = Date.now() < speedBoostUntil ? levelInterval * 0.55 : levelInterval;
     maybeSpawnPowerUp();
+    updatePowerIcon();
   }
 
-  function pathRoundedRect(x, y, w, h, r){
+  // ---- ذرات ----
+  function spawnParticles(x, y, color, count=30){
+    for(let i=0;i<count;i++){
+      const angle = Math.random() * 2 * Math.PI;
+      const speed = 1 + Math.random() * 4;
+      particles.push({
+        x, y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 1,
+        life: 1,
+        decay: 0.008 + Math.random() * 0.02,
+        color: color,
+        size: 2 + Math.random() * 4
+      });
+    }
+  }
+
+  function updateParticles(){
+    for(let i=particles.length-1; i>=0; i--){
+      const p = particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.05;
+      p.life -= p.decay;
+      if(p.life <= 0) particles.splice(i,1);
+    }
+  }
+
+  // ---- کامبو ----
+  let comboTimeout = null;
+  function showCombo(count){
+    comboText.textContent = `🔥 ${count}x COMBO!`;
+    comboText.classList.add('show');
+    clearTimeout(comboTimeout);
+    comboTimeout = setTimeout(() => comboText.classList.remove('show'), 1200);
+  }
+
+  // ---- رسم ----
+  function pathRoundedRect(x,y,w,h,r){
     ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.lineTo(x + w - r, y);
-    ctx.arcTo(x + w, y, x + w, y + r, r);
-    ctx.lineTo(x + w, y + h - r);
-    ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
-    ctx.lineTo(x + r, y + h);
-    ctx.arcTo(x, y + h, x, y + h - r, r);
-    ctx.lineTo(x, y + r);
-    ctx.arcTo(x, y, x + r, y, r);
+    ctx.moveTo(x+r,y);
+    ctx.lineTo(x+w-r,y);
+    ctx.arcTo(x+w,y,x+w,y+r,r);
+    ctx.lineTo(x+w,y+h-r);
+    ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
+    ctx.lineTo(x+r,y+h);
+    ctx.arcTo(x,y+h,x,y+h-r,r);
+    ctx.lineTo(x,y+r);
+    ctx.arcTo(x,y,x+r,y,r);
     ctx.closePath();
   }
 
-  function drawGlowCell(cell, color, glow){
+  function darkenColor(hex, factor){
+    let r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+    r=Math.floor(r*factor); g=Math.floor(g*factor); b=Math.floor(b*factor);
+    return `rgb(${r},${g},${b})`;
+  }
+
+  function applyFilter(){
+    const filters = {
+      normal: 'none',
+      cinema: 'contrast(0.9) saturate(0.7) sepia(0.15)',
+      neon: 'contrast(1.2) saturate(1.8) hue-rotate(-10deg)',
+      mono: 'grayscale(0.95) sepia(0.2) contrast(1.1)'
+    };
+    canvas.style.filter = filters[currentFilter] || 'none';
+  }
+
+  function drawGlowCell(cell, color, glow, size=null){
+    if(!cell) return;
     const x = cell.x * CELL, y = cell.y * CELL;
+    const sz = size || CELL-4;
+    const offset = (CELL - sz)/2;
     ctx.save();
     ctx.shadowColor = color;
-    ctx.shadowBlur = glow;
+    ctx.shadowBlur = glow * 1.2;
     ctx.fillStyle = color;
-    pathRoundedRect(x+2, y+2, CELL-4, CELL-4, 4);
+    pathRoundedRect(x+offset, y+offset, sz, sz, 4);
+    ctx.fill();
+    ctx.shadowBlur = glow * 0.6;
+    ctx.shadowColor = 'rgba(255,255,255,0.1)';
     ctx.fill();
     ctx.restore();
   }
 
+  function drawSnakeCell(cell, isHead){
+    if(!cell) return;
+    const x = cell.x * CELL, y = cell.y * CELL;
+    const color = isHead ? skin.color : darkenColor(skin.color, 0.65);
+    const glow = isHead ? 16 : 8;
+    const sz = isHead ? CELL-3 : CELL-5;
+    const offset = (CELL - sz)/2;
+
+    ctx.save();
+    ctx.shadowColor = color;
+    ctx.shadowBlur = glow;
+    ctx.fillStyle = color;
+    pathRoundedRect(x+offset, y+offset, sz, sz, 4);
+    ctx.fill();
+    ctx.shadowBlur = glow * 0.4;
+    ctx.shadowColor = 'rgba(255,255,255,0.08)';
+    ctx.fill();
+    ctx.restore();
+
+    if(!isHead && skin.pattern !== 'simple'){
+      ctx.save();
+      ctx.globalAlpha = 0.25;
+      ctx.fillStyle = '#fff';
+      const p = skin.pattern;
+      if(p === 'dotted'){
+        for(let i=0;i<3;i++){
+          for(let j=0;j<3;j++){
+            if((i+j)%2===0){
+              ctx.beginPath();
+              ctx.arc(x + CELL/2 + (i-1)*CELL*0.25, y + CELL/2 + (j-1)*CELL*0.25, 2, 0, Math.PI*2);
+              ctx.fill();
+            }
+          }
+        }
+      } else if(p === 'striped'){
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 1.5;
+        for(let i=-1;i<=1;i++){
+          ctx.beginPath();
+          ctx.moveTo(x + CELL/2 + i*CELL*0.3, y + 2);
+          ctx.lineTo(x + CELL/2 + i*CELL*0.3, y + CELL - 2);
+          ctx.stroke();
+        }
+      } else if(p === 'checkered'){
+        for(let i=0;i<2;i++){
+          for(let j=0;j<2;j++){
+            if((i+j)%2===0){
+              ctx.fillRect(x + i*CELL/2 + 2, y + j*CELL/2 + 2, CELL/2 - 4, CELL/2 - 4);
+            }
+          }
+        }
+      }
+      ctx.restore();
+    }
+
+    if(isHead){
+      ctx.save();
+      ctx.fillStyle = '#05060a';
+      ctx.font = `bold ${CELL * 0.55}px "Vazirmatn", sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(skin.letter, x + CELL/2, y + CELL/2 + 2);
+      ctx.restore();
+      ctx.save();
+      ctx.shadowColor = 'rgba(255,255,255,0.15)';
+      ctx.shadowBlur = 8;
+      ctx.fillStyle = 'rgba(255,255,255,0.06)';
+      pathRoundedRect(x+4, y+4, CELL-8, CELL-8, 4);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
   function draw(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = isDay ? '#e8edf2' : '#05060a';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
 
-    // grid
-    ctx.strokeStyle = COLORS.gridLine;
+    ctx.strokeStyle = isDay ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.03)';
     ctx.lineWidth = 1;
     for(let i=0;i<=COLS;i++){
       ctx.beginPath(); ctx.moveTo(i*CELL,0); ctx.lineTo(i*CELL,canvas.height); ctx.stroke();
@@ -448,133 +1056,320 @@
       ctx.beginPath(); ctx.moveTo(0,j*CELL); ctx.lineTo(canvas.width,j*CELL); ctx.stroke();
     }
 
-    obstacles.forEach(o => drawGlowCell(o, COLORS.obstacle, 8));
-    drawGlowCell(food, COLORS.food, 14);
-    if (powerUp){
-      drawGlowCell(powerUp, powerUp.type === 'speed' ? COLORS.speed : COLORS.double, 16);
+    if(!food) spawnFood();
+    if(obstacles.length === 0) spawnObstacles(3);
+
+    obstacles.forEach(o => drawGlowCell(o, COLORS.obstacle, 10));
+    if(food) drawGlowCell(food, COLORS.food, 16);
+    if(powerUp){
+      const c = powerUp.type === 'speed' ? COLORS.speed : COLORS.double;
+      drawGlowCell(powerUp, c, 18);
     }
 
-    snake.forEach((s,i) => {
-      drawGlowCell(s, i === 0 ? COLORS.snakeHead : COLORS.snakeBody, i === 0 ? 12 : 5);
+    if(snake && snake.length > 0){
+      snake.forEach((s,i) => drawSnakeCell(s, i===0));
+    } else {
+      const fallbackSnake = [{x:9,y:10},{x:8,y:10},{x:7,y:10}];
+      fallbackSnake.forEach((s,i) => drawSnakeCell(s, i===0));
+    }
+
+    particles.forEach(p => {
+      ctx.save();
+      ctx.globalAlpha = p.life;
+      ctx.shadowColor = p.color;
+      ctx.shadowBlur = 6;
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size * p.life * 0.8, 0, Math.PI*2);
+      ctx.fill();
+      ctx.restore();
     });
+
+    applyFilter();
   }
 
+  // ---- حلقه اصلی ----
   function loop(ts){
-    if (!running) return;
-    if (ts - lastStep >= currentInterval){
+    if(!running){
+      rafId = requestAnimationFrame(loop);
+      return;
+    }
+    if(!paused && ts - lastStep >= currentInterval){
       lastStep = ts;
       step();
     }
+    updateParticles();
     draw();
     rafId = requestAnimationFrame(loop);
   }
 
+  // ---- کنترل pause ----
+  function togglePause(){
+    if(!running) return;
+    paused = !paused;
+    pauseOverlay.classList.toggle('hidden', !paused);
+    pauseBtn.textContent = paused ? '▶ ادامه' : '⏸ توقف';
+    if(!paused) lastStep = performance.now();
+  }
+  pauseBtn.addEventListener('click', togglePause);
+
+  // ---- شروع ----
   function start(){
     reset();
     running = true;
+    paused = false;
+    pauseOverlay.classList.add('hidden');
     startOverlay.classList.add('hidden');
     overOverlay.classList.add('hidden');
-    lastStep = 0;
+    pauseBtn.textContent = '⏸ توقف';
+    lastStep = performance.now();
+    draw();
+    if(rafId) cancelAnimationFrame(rafId);
     rafId = requestAnimationFrame(loop);
   }
 
-  // input
+  // ---- ورودی کیبورد ----
   const KEY_DIR = {
-    ArrowUp:{x:0,y:-1}, ArrowDown:{x:0,y:1}, ArrowLeft:{x:-1,y:0}, ArrowRight:{x:1,y:0},
+    arrowup:{x:0,y:-1}, arrowdown:{x:0,y:1}, arrowleft:{x:-1,y:0}, arrowright:{x:1,y:0},
     w:{x:0,y:-1}, s:{x:0,y:1}, a:{x:-1,y:0}, d:{x:1,y:0}
   };
   function trySetDir(d){
-    if (!d) return;
-    if (d.x === -dir.x && d.y === -dir.y) return; // no 180 turn
+    if(!d) return;
+    if(d.x === -dir.x && d.y === -dir.y) return;
     nextDir = d;
   }
   window.addEventListener('keydown', e => {
-    if (KEY_DIR[e.key]){ e.preventDefault(); trySetDir(KEY_DIR[e.key]); }
+    const key = e.key.toLowerCase();
+    if(KEY_DIR[key]){ e.preventDefault(); trySetDir(KEY_DIR[key]); }
+    if(e.key === ' ' || e.key === 'Space'){ e.preventDefault(); togglePause(); }
   });
 
-  const touchZone = document.getElementById('touchZone');
-  const joystickBase = document.getElementById('joystickBase');
-  const joystickStick = document.getElementById('joystickStick');
-  const JOY_RADIUS = 45; // how far the stick can travel from its anchor, in px
+  // ============================================================
+  //  کنترل‌های لمسی (جوی‌استیک + دکمه‌ها)
+  // ============================================================
 
-  let anchor = {x:0,y:0};
-  let joystickActive = false;
+  // ---- دکمه‌های فلش ----
+  document.querySelectorAll('.ctrl-btn[data-dir]').forEach(btn => {
+    const dirMap = {
+      up: {x:0,y:-1},
+      down: {x:0,y:1},
+      left: {x:-1,y:0},
+      right: {x:1,y:0}
+    };
+    const startDir = (e) => {
+      e.preventDefault();
+      if(controlMode === 'buttons') trySetDir(dirMap[btn.dataset.dir]);
+    };
+    btn.addEventListener('touchstart', startDir);
+    btn.addEventListener('mousedown', startDir);
+  });
 
-  function resetStick(){
+  // ---- جوی‌استیک قابل جابجایی ----
+  function loadJoystickPosition(){
+    try {
+      const pos = localStorage.getItem('joystick_position');
+      if(pos){
+        const {x,y} = JSON.parse(pos);
+        joystickWrapper.style.left = x + 'px';
+        joystickWrapper.style.top = y + 'px';
+      } else {
+        // موقعیت پیش‌فرض: پایین سمت چپ
+        joystickWrapper.style.left = '20px';
+        joystickWrapper.style.top = (window.innerHeight - 160) + 'px';
+      }
+    } catch(e){
+      joystickWrapper.style.left = '20px';
+      joystickWrapper.style.top = (window.innerHeight - 160) + 'px';
+    }
+  }
+  function saveJoystickPosition(){
+    const rect = joystickWrapper.getBoundingClientRect();
+    try {
+      localStorage.setItem('joystick_position', JSON.stringify({x: rect.left, y: rect.top}));
+    } catch(e){}
+  }
+
+  // نمایش/مخفی کردن جوی‌استیک بر اساس حالت
+  function updateControlMode(mode){
+    controlMode = mode;
+    document.querySelectorAll('.toggle-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+    if(mode === 'joystick'){
+      joystickWrapper.classList.add('active');
+      touchControls.classList.remove('show');
+    } else {
+      joystickWrapper.classList.remove('active');
+      touchControls.classList.add('show');
+    }
+  }
+
+  // کنترل حالت با دکمه‌های سوئیچ
+  document.querySelectorAll('.toggle-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      updateControlMode(btn.dataset.mode);
+    });
+  });
+
+  // جابجایی جوی‌استیک با درگ
+  function startDrag(e){
+    e.preventDefault();
+    isDraggingJoystick = true;
+    const rect = joystickWrapper.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    dragOffsetX = clientX - rect.left;
+    dragOffsetY = clientY - rect.top;
+    joystickWrapper.classList.add('dragging');
+    document.addEventListener('mousemove', onDrag);
+    document.addEventListener('touchmove', onDrag, {passive: false});
+    document.addEventListener('mouseup', endDrag);
+    document.addEventListener('touchend', endDrag);
+  }
+
+  function onDrag(e){
+    e.preventDefault();
+    if(!isDraggingJoystick) return;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    let left = clientX - dragOffsetX;
+    let top = clientY - dragOffsetY;
+    // محدود کردن به داخل صفحه
+    const wrapperSize = joystickWrapper.offsetWidth || 140;
+    left = Math.max(0, Math.min(window.innerWidth - wrapperSize, left));
+    top = Math.max(0, Math.min(window.innerHeight - wrapperSize, top));
+    joystickWrapper.style.left = left + 'px';
+    joystickWrapper.style.top = top + 'px';
+  }
+
+  function endDrag(e){
+    isDraggingJoystick = false;
+    joystickWrapper.classList.remove('dragging');
+    saveJoystickPosition();
+    document.removeEventListener('mousemove', onDrag);
+    document.removeEventListener('touchmove', onDrag);
+    document.removeEventListener('mouseup', endDrag);
+    document.removeEventListener('touchend', endDrag);
+  }
+
+  joystickHandle.addEventListener('mousedown', startDrag);
+  joystickHandle.addEventListener('touchstart', startDrag, {passive: false});
+
+  // کنترل جوی‌استیک (حرکت)
+  function handleJoystickStart(e){
+    e.preventDefault();
+    const touch = e.touches ? e.touches[0] : e;
+    const rect = joystickBase.getBoundingClientRect();
+    const cx = rect.left + rect.width/2;
+    const cy = rect.top + rect.height/2;
+    joystickActive = true;
+    joystickAnchor = {x: cx, y: cy};
+    updateJoystickPosition(touch.clientX, touch.clientY);
+  }
+
+  function handleJoystickMove(e){
+    e.preventDefault();
+    if(!joystickActive) return;
+    const touch = e.touches ? e.touches[0] : e;
+    updateJoystickPosition(touch.clientX, touch.clientY);
+  }
+
+  function handleJoystickEnd(e){
+    joystickActive = false;
     joystickStick.style.transform = 'translate(-50%,-50%)';
   }
 
-  function showJoystickAt(clientX, clientY){
-    const rect = touchZone.getBoundingClientRect();
-    anchor = { x: clientX, y: clientY };
-    const half = joystickBase.offsetWidth / 2;
-    let localX = clientX - rect.left;
-    let localY = clientY - rect.top;
-    // keep the whole pad inside the zone
-    localX = Math.min(Math.max(localX, half), rect.width - half);
-    localY = Math.min(Math.max(localY, half), rect.height - half);
-    joystickBase.style.left = (localX - half) + 'px';
-    joystickBase.style.top = (localY - half) + 'px';
-    joystickBase.classList.add('active');
-    resetStick();
-  }
-
-  function updateJoystick(clientX, clientY){
-    const dx = clientX - anchor.x;
-    const dy = clientY - anchor.y;
+  function updateJoystickPosition(clientX, clientY){
+    const dx = clientX - joystickAnchor.x;
+    const dy = clientY - joystickAnchor.y;
     const dist = Math.min(Math.hypot(dx,dy), JOY_RADIUS);
     const angle = Math.atan2(dy,dx);
-    joystickStick.style.transform =
-      `translate(${-50 + (Math.cos(angle)*dist/JOY_RADIUS)*45}%, ${-50 + (Math.sin(angle)*dist/JOY_RADIUS)*45}%)`;
+    const stickX = (Math.cos(angle) * dist / JOY_RADIUS) * 45;
+    const stickY = (Math.sin(angle) * dist / JOY_RADIUS) * 45;
+    joystickStick.style.transform = `translate(${-50 + stickX}%, ${-50 + stickY}%)`;
 
-    // ignore tiny movements near the anchor (dead zone)
-    if (Math.hypot(dx,dy) < 12) return;
-
-    // quantize the angle into the 4 cardinal directions
+    if(Math.hypot(dx,dy) < 15) return;
     const deg = angle * 180 / Math.PI;
-    if (deg > -45 && deg <= 45) trySetDir({x:1,y:0});
-    else if (deg > 45 && deg <= 135) trySetDir({x:0,y:1});
-    else if (deg > -135 && deg <= -45) trySetDir({x:0,y:-1});
-    else trySetDir({x:-1,y:0});
-  }
-
-  function hideJoystick(){
-    joystickActive = false;
-    joystickBase.classList.remove('active');
-  }
-
-  touchZone.addEventListener('pointerdown', e => {
-    joystickActive = true;
-    touchZone.setPointerCapture(e.pointerId);
-    showJoystickAt(e.clientX, e.clientY);
-  });
-  touchZone.addEventListener('pointermove', e => {
-    if (!joystickActive) return;
-    updateJoystick(e.clientX, e.clientY);
-  });
-  touchZone.addEventListener('pointerup', hideJoystick);
-  touchZone.addEventListener('pointercancel', hideJoystick);
-
-  // swipe support directly on canvas
-  let touchStart = null;
-  canvas.addEventListener('touchstart', e => {
-    touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-  }, {passive:true});
-  canvas.addEventListener('touchend', e => {
-    if (!touchStart) return;
-    const dx = e.changedTouches[0].clientX - touchStart.x;
-    const dy = e.changedTouches[0].clientY - touchStart.y;
-    if (Math.abs(dx) > Math.abs(dy)){
-      trySetDir({x: dx > 0 ? 1 : -1, y:0});
-    } else {
-      trySetDir({x:0, y: dy > 0 ? 1 : -1});
+    if(controlMode === 'joystick'){
+      if(deg > -45 && deg <= 45) trySetDir({x:1,y:0});
+      else if(deg > 45 && deg <= 135) trySetDir({x:0,y:1});
+      else if(deg > -135 && deg <= -45) trySetDir({x:0,y:-1});
+      else trySetDir({x:-1,y:0});
     }
-    touchStart = null;
-  }, {passive:true});
+  }
 
+  // رویدادهای جوی‌استیک
+  joystickBase.addEventListener('touchstart', handleJoystickStart, {passive: false});
+  joystickBase.addEventListener('touchmove', handleJoystickMove, {passive: false});
+  joystickBase.addEventListener('touchend', handleJoystickEnd);
+  joystickBase.addEventListener('touchcancel', handleJoystickEnd);
+  joystickBase.addEventListener('mousedown', handleJoystickStart);
+  document.addEventListener('mousemove', (e) => {
+    if(joystickActive) handleJoystickMove(e);
+  });
+  document.addEventListener('mouseup', handleJoystickEnd);
+
+  // ---- تم ----
+  themeToggle.addEventListener('click', () => {
+    isDay = !isDay;
+    document.body.classList.toggle('day-mode', isDay);
+    themeToggle.textContent = isDay ? '☀️' : '🌙';
+    document.querySelectorAll('.star').forEach(el => {
+      el.style.background = isDay ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.6)';
+    });
+  });
+
+  // ---- تمام‌صفحه ----
+  fullscreenBtn.addEventListener('click', () => {
+    if(!document.fullscreenElement){
+      document.documentElement.requestFullscreen?.() || document.documentElement.webkitRequestFullscreen?.();
+    } else {
+      document.exitFullscreen?.() || document.webkitExitFullscreen?.();
+    }
+  });
+
+  // ---- شخصی‌سازی ----
+  document.getElementById('skinLetter').addEventListener('input', function(){
+    let l = this.value.trim().toUpperCase();
+    if(l.length === 0) l = '?';
+    skin.letter = l;
+  });
+  document.getElementById('skinColor').addEventListener('input', function(){
+    skin.color = this.value;
+  });
+  document.getElementById('skinPattern').addEventListener('change', function(){
+    skin.pattern = this.value;
+  });
+
+  // ---- فیلترها ----
+  document.querySelectorAll('.fbtn').forEach(btn => {
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      currentFilter = this.dataset.filter;
+    });
+  });
+
+  // ---- دکمه‌های شروع ----
   document.getElementById('startBtn').addEventListener('click', start);
   document.getElementById('restartBtn').addEventListener('click', start);
 
+  // ---- مقداردهی اولیه ----
+  loadJoystickPosition();
+  // فقط در گوشی نمایش داده بشه
+  if('ontouchstart' in window || navigator.maxTouchPoints > 0){
+    joystickWrapper.classList.add('active');
+    touchControls.classList.add('show');
+    updateControlMode('joystick');
+  } else {
+    joystickWrapper.classList.remove('active');
+    touchControls.classList.remove('show');
+  }
+
+  reset();
+  running = false;
+  draw();
+
+  // ذخیره موقعیت جوی‌استیک هنگام تغییر اندازه
+  window.addEventListener('resize', saveJoystickPosition);
 })();
 </script>
 </body>
