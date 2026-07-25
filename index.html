@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;800&family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
-  /* ===== استایل‌های پایه (همان‌ها) ===== */
+  /* ===== همه‌ی استایل‌ها مثل قبل ===== */
   :root{
     --bg:#05060a;
     --grid:#0b0f16;
@@ -350,7 +350,7 @@
     touch-action: none;
     cursor: grab;
     user-select: none;
-    display: block; /* همیشه نمایش داده شود */
+    display: block;
   }
   .joystick-wrapper.dragging {
     cursor: grabbing;
@@ -416,12 +416,6 @@
   }
   .joystick-handle:active { cursor: grabbing; }
 
-  /* فقط در گوشی نمایش داده شود (اختیاری) */
-  @media (hover:none) and (pointer:coarse) {
-    .joystick-wrapper {
-      display: block;
-    }
-  }
   @media (max-width:500px){
     .title{font-size:12px;gap:8px;}
     .title .btn-icon{width:28px;height:28px;font-size:14px;}
@@ -488,10 +482,10 @@
   <span><i class="dot speed"></i> سرعت</span>
   <span><i class="dot double"></i> دوبل</span>
   <span><i class="dot obstacle"></i> مانع</span>
-  <span id="obstacleCount">🚧 ۳</span>
+  <span id="obstacleCount">🚧 ۱</span>
 </div>
 
-<!-- ===== فقط جوی‌استیک (بدون دکمه‌های فلش و بدون انتخابگر) ===== -->
+<!-- ===== فقط جوی‌استیک ===== -->
 <div class="joystick-wrapper" id="joystickWrapper">
   <div class="joystick-base" id="joystickBase">
     <div class="joystick-arrow up"><svg viewBox="0 0 24 24"><path d="M12 4 L20 18 L4 18 Z"/></svg></div>
@@ -549,9 +543,10 @@
   let particles = [];
   let stars = [];
 
-  // ---- جوی‌استیک ----
+  // ---- جوی‌استیک با Pointer Events ----
   let joystickActive = false;
-  let joystickAnchor = {x:0,y:0};
+  let joystickPointerId = null;
+  let joystickAnchor = {x:0, y:0};
   const JOY_RADIUS = 45;
   let isDraggingJoystick = false;
   let dragOffsetX = 0, dragOffsetY = 0;
@@ -600,7 +595,7 @@
   }
   initStars();
 
-  // ---- توابع اصلی بازی (همان‌ها) ----
+  // ---- توابع اصلی بازی ----
   function randCell(exclude){
     const total = COLS * ROWS;
     const free = [];
@@ -659,7 +654,7 @@
     particles = [];
     clearTimeout(powerUpTimer);
     spawnFood();
-    spawnObstacles(3);
+    spawnObstacles(1); // ⬅️ تغییر اصلی: موانع اولیه به ۱ کاهش یافت
     scoreEl.textContent = score;
     progressBar.style.width = '0%';
     paused = false;
@@ -924,7 +919,7 @@
     }
 
     if(!food) spawnFood();
-    if(obstacles.length === 0) spawnObstacles(3);
+    if(obstacles.length === 0) spawnObstacles(1);
 
     obstacles.forEach(o => drawGlowCell(o, COLORS.obstacle, 10));
     if(food) drawGlowCell(food, COLORS.food, 16);
@@ -1012,30 +1007,30 @@
   });
 
   // ============================================================
-  //  کنترل جوی‌استیک (بدون دکمه‌های اضافی)
+  //  کنترل جوی‌استیک با Pointer Events (مقاوم‌تر)
   // ============================================================
 
-  // ---- جابجایی جوی‌استیک با درگ ----
-  function startDrag(e){
+  // ---- جابجایی جوی‌استیک با درگ (دسته) ----
+  function startDrag(e) {
     e.preventDefault();
     isDraggingJoystick = true;
     const rect = joystickWrapper.getBoundingClientRect();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const clientX = e.clientX;
+    const clientY = e.clientY;
     dragOffsetX = clientX - rect.left;
     dragOffsetY = clientY - rect.top;
     joystickWrapper.classList.add('dragging');
-    document.addEventListener('mousemove', onDrag);
-    document.addEventListener('touchmove', onDrag, {passive: false});
-    document.addEventListener('mouseup', endDrag);
-    document.addEventListener('touchend', endDrag);
+    joystickWrapper.setPointerCapture(e.pointerId);
+    joystickWrapper.addEventListener('pointermove', onDrag);
+    joystickWrapper.addEventListener('pointerup', endDrag);
+    joystickWrapper.addEventListener('pointercancel', endDrag);
   }
 
-  function onDrag(e){
+  function onDrag(e) {
     e.preventDefault();
-    if(!isDraggingJoystick) return;
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    if (!isDraggingJoystick) return;
+    const clientX = e.clientX;
+    const clientY = e.clientY;
     let left = clientX - dragOffsetX;
     let top = clientY - dragOffsetY;
     const wrapperSize = joystickWrapper.offsetWidth || 140;
@@ -1045,18 +1040,66 @@
     joystickWrapper.style.top = top + 'px';
   }
 
-  function endDrag(e){
+  function endDrag(e) {
     isDraggingJoystick = false;
     joystickWrapper.classList.remove('dragging');
     saveJoystickPosition();
-    document.removeEventListener('mousemove', onDrag);
-    document.removeEventListener('touchmove', onDrag);
-    document.removeEventListener('mouseup', endDrag);
-    document.removeEventListener('touchend', endDrag);
+    joystickWrapper.removeEventListener('pointermove', onDrag);
+    joystickWrapper.removeEventListener('pointerup', endDrag);
+    joystickWrapper.removeEventListener('pointercancel', endDrag);
   }
 
-  joystickHandle.addEventListener('mousedown', startDrag);
-  joystickHandle.addEventListener('touchstart', startDrag, {passive: false});
+  joystickHandle.addEventListener('pointerdown', startDrag);
+
+  // ---- کنترل جهت جوی‌استیک ----
+  function handleJoystickStart(e) {
+    e.preventDefault();
+    const rect = joystickBase.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    joystickActive = true;
+    joystickPointerId = e.pointerId;
+    joystickAnchor = {x: cx, y: cy};
+    joystickBase.setPointerCapture(e.pointerId);
+    updateJoystickPosition(e.clientX, e.clientY);
+    joystickBase.addEventListener('pointermove', handleJoystickMove);
+    joystickBase.addEventListener('pointerup', handleJoystickEnd);
+    joystickBase.addEventListener('pointercancel', handleJoystickEnd);
+  }
+
+  function handleJoystickMove(e) {
+    e.preventDefault();
+    if (!joystickActive) return;
+    updateJoystickPosition(e.clientX, e.clientY);
+  }
+
+  function handleJoystickEnd(e) {
+    joystickActive = false;
+    joystickPointerId = null;
+    joystickStick.style.transform = 'translate(-50%,-50%)';
+    joystickBase.removeEventListener('pointermove', handleJoystickMove);
+    joystickBase.removeEventListener('pointerup', handleJoystickEnd);
+    joystickBase.removeEventListener('pointercancel', handleJoystickEnd);
+  }
+
+  function updateJoystickPosition(clientX, clientY) {
+    const dx = clientX - joystickAnchor.x;
+    const dy = clientY - joystickAnchor.y;
+    const dist = Math.min(Math.hypot(dx, dy), JOY_RADIUS);
+    const angle = Math.atan2(dy, dx);
+    const stickX = (Math.cos(angle) * dist / JOY_RADIUS) * 45;
+    const stickY = (Math.sin(angle) * dist / JOY_RADIUS) * 45;
+    joystickStick.style.transform = `translate(${-50 + stickX}%, ${-50 + stickY}%)`;
+
+    if (Math.hypot(dx, dy) < 15) return;
+    const deg = angle * 180 / Math.PI;
+    if (deg > -45 && deg <= 45) trySetDir({x: 1, y: 0});
+    else if (deg > 45 && deg <= 135) trySetDir({x: 0, y: 1});
+    else if (deg > -135 && deg <= -45) trySetDir({x: 0, y: -1});
+    else trySetDir({x: -1, y: 0});
+  }
+
+  joystickBase.addEventListener('pointerdown', handleJoystickStart);
 
   // ---- ذخیره و بازیابی موقعیت جوی‌استیک ----
   function loadJoystickPosition(){
@@ -1081,58 +1124,6 @@
       localStorage.setItem('joystick_position', JSON.stringify({x: rect.left, y: rect.top}));
     } catch(e){}
   }
-
-  // ---- کنترل حرکت جوی‌استیک ----
-  function handleJoystickStart(e){
-    e.preventDefault();
-    const touch = e.touches ? e.touches[0] : e;
-    const rect = joystickBase.getBoundingClientRect();
-    const cx = rect.left + rect.width/2;
-    const cy = rect.top + rect.height/2;
-    joystickActive = true;
-    joystickAnchor = {x: cx, y: cy};
-    updateJoystickPosition(touch.clientX, touch.clientY);
-  }
-
-  function handleJoystickMove(e){
-    e.preventDefault();
-    if(!joystickActive) return;
-    const touch = e.touches ? e.touches[0] : e;
-    updateJoystickPosition(touch.clientX, touch.clientY);
-  }
-
-  function handleJoystickEnd(e){
-    joystickActive = false;
-    joystickStick.style.transform = 'translate(-50%,-50%)';
-  }
-
-  function updateJoystickPosition(clientX, clientY){
-    const dx = clientX - joystickAnchor.x;
-    const dy = clientY - joystickAnchor.y;
-    const dist = Math.min(Math.hypot(dx,dy), JOY_RADIUS);
-    const angle = Math.atan2(dy,dx);
-    const stickX = (Math.cos(angle) * dist / JOY_RADIUS) * 45;
-    const stickY = (Math.sin(angle) * dist / JOY_RADIUS) * 45;
-    joystickStick.style.transform = `translate(${-50 + stickX}%, ${-50 + stickY}%)`;
-
-    if(Math.hypot(dx,dy) < 15) return;
-    const deg = angle * 180 / Math.PI;
-    if(deg > -45 && deg <= 45) trySetDir({x:1,y:0});
-    else if(deg > 45 && deg <= 135) trySetDir({x:0,y:1});
-    else if(deg > -135 && deg <= -45) trySetDir({x:0,y:-1});
-    else trySetDir({x:-1,y:0});
-  }
-
-  // رویدادهای جوی‌استیک
-  joystickBase.addEventListener('touchstart', handleJoystickStart, {passive: false});
-  joystickBase.addEventListener('touchmove', handleJoystickMove, {passive: false});
-  joystickBase.addEventListener('touchend', handleJoystickEnd);
-  joystickBase.addEventListener('touchcancel', handleJoystickEnd);
-  joystickBase.addEventListener('mousedown', handleJoystickStart);
-  document.addEventListener('mousemove', (e) => {
-    if(joystickActive) handleJoystickMove(e);
-  });
-  document.addEventListener('mouseup', handleJoystickEnd);
 
   // ---- تم ----
   themeToggle.addEventListener('click', () => {
