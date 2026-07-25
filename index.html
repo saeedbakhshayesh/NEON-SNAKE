@@ -340,11 +340,11 @@
     transform:translateX(-50%) scale(1.2);
   }
 
-  /* ===== جوی‌استیک ===== */
+  /* ===== جوی‌استیک بزرگ‌تر و حساستر ===== */
   .joystick-wrapper {
     position: fixed;
-    width: 140px;
-    height: 140px;
+    width: 160px;  /* بزرگتر از قبل */
+    height: 160px;
     z-index: 100;
     pointer-events: auto;
     touch-action: none;
@@ -373,18 +373,18 @@
     pointer-events: none;
     line-height: 0;
   }
-  .joystick-arrow svg { display: block; width: 16px; height: 16px; fill: currentColor; }
+  .joystick-arrow svg { display: block; width: 18px; height: 18px; fill: currentColor; }
   .joystick-arrow.right svg { transform: rotate(90deg); }
   .joystick-arrow.down svg { transform: rotate(180deg); }
   .joystick-arrow.left svg { transform: rotate(270deg); }
-  .joystick-arrow.up { top: 12px; left: 50%; transform: translateX(-50%); }
-  .joystick-arrow.down { bottom: 12px; left: 50%; transform: translateX(-50%); }
-  .joystick-arrow.left { left: 12px; top: 50%; transform: translateY(-50%); }
-  .joystick-arrow.right { right: 12px; top: 50%; transform: translateY(-50%); }
+  .joystick-arrow.up { top: 14px; left: 50%; transform: translateX(-50%); }
+  .joystick-arrow.down { bottom: 14px; left: 50%; transform: translateX(-50%); }
+  .joystick-arrow.left { left: 14px; top: 50%; transform: translateY(-50%); }
+  .joystick-arrow.right { right: 14px; top: 50%; transform: translateY(-50%); }
   .joystick-stick {
     position: absolute;
-    width: 56px;
-    height: 56px;
+    width: 64px;   /* بزرگتر */
+    height: 64px;
     border-radius: 50%;
     top: 50%;
     left: 50%;
@@ -392,22 +392,22 @@
     border: 2px solid var(--cyan);
     box-shadow: 0 0 20px var(--shadow-cyan);
     transform: translate(-50%, -50%);
-    transition: transform 0.08s ease;
+    transition: transform 0.06s ease;
     pointer-events: none;
   }
   .joystick-handle {
     position: absolute;
     top: -8px;
     right: -8px;
-    width: 24px;
-    height: 24px;
+    width: 26px;
+    height: 26px;
     background: rgba(0,240,255,0.2);
     border-radius: 50%;
     border: 1px solid var(--cyan);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
+    font-size: 14px;
     color: var(--cyan);
     cursor: grab;
     touch-action: none;
@@ -422,8 +422,8 @@
     .hud .box{min-width:50px;padding:4px 8px;font-size:8px;}
     .controls-panel{padding:4px 10px;gap:6px;}
     .controls-panel label{font-size:10px;}
-    .joystick-wrapper { width: 120px; height: 120px; }
-    .joystick-stick { width: 48px; height: 48px; }
+    .joystick-wrapper { width: 140px; height: 140px; } /* در موبایل کمی کوچکتر ولی هنوز بزرگ */
+    .joystick-stick { width: 56px; height: 56px; }
   }
 </style>
 </head>
@@ -485,7 +485,7 @@
   <span id="obstacleCount">🚧 ۱</span>
 </div>
 
-<!-- ===== فقط جوی‌استیک ===== -->
+<!-- ===== جوی‌استیک ===== -->
 <div class="joystick-wrapper" id="joystickWrapper">
   <div class="joystick-base" id="joystickBase">
     <div class="joystick-arrow up"><svg viewBox="0 0 24 24"><path d="M12 4 L20 18 L4 18 Z"/></svg></div>
@@ -543,11 +543,11 @@
   let particles = [];
   let stars = [];
 
-  // ---- جوی‌استیک با Pointer Events ----
+  // ---- جوی‌استیک با Pointer Events و حساسیت بالا ----
   let joystickActive = false;
   let joystickPointerId = null;
   let joystickAnchor = {x:0, y:0};
-  const JOY_RADIUS = 45;
+  const JOY_RADIUS = 35;  // کاهش برای حساسیت بیشتر
   let isDraggingJoystick = false;
   let dragOffsetX = 0, dragOffsetY = 0;
 
@@ -654,7 +654,7 @@
     particles = [];
     clearTimeout(powerUpTimer);
     spawnFood();
-    spawnObstacles(1); // ⬅️ تغییر اصلی: موانع اولیه به ۱ کاهش یافت
+    spawnObstacles(1);
     scoreEl.textContent = score;
     progressBar.style.width = '0%';
     paused = false;
@@ -1007,7 +1007,7 @@
   });
 
   // ============================================================
-  //  کنترل جوی‌استیک با Pointer Events (مقاوم‌تر)
+  //  کنترل جوی‌استیک با حساسیت بالا و جهت‌های صحیح
   // ============================================================
 
   // ---- جابجایی جوی‌استیک با درگ (دسته) ----
@@ -1033,7 +1033,7 @@
     const clientY = e.clientY;
     let left = clientX - dragOffsetX;
     let top = clientY - dragOffsetY;
-    const wrapperSize = joystickWrapper.offsetWidth || 140;
+    const wrapperSize = joystickWrapper.offsetWidth || 160;
     left = Math.max(0, Math.min(window.innerWidth - wrapperSize, left));
     top = Math.max(0, Math.min(window.innerHeight - wrapperSize, top));
     joystickWrapper.style.left = left + 'px';
@@ -1051,7 +1051,7 @@
 
   joystickHandle.addEventListener('pointerdown', startDrag);
 
-  // ---- کنترل جهت جوی‌استیک ----
+  // ---- کنترل جهت جوی‌استیک با حساسیت بالا ----
   function handleJoystickStart(e) {
     e.preventDefault();
     const rect = joystickBase.getBoundingClientRect();
@@ -1091,12 +1091,15 @@
     const stickY = (Math.sin(angle) * dist / JOY_RADIUS) * 45;
     joystickStick.style.transform = `translate(${-50 + stickX}%, ${-50 + stickY}%)`;
 
-    if (Math.hypot(dx, dy) < 15) return;
+    // حساسیت بالا: با حرکت خیلی کم هم جهت تشخیص داده بشه
+    if (Math.hypot(dx, dy) < 8) return;  // کاهش آستانه از ۱۵ به ۸
+
     const deg = angle * 180 / Math.PI;
-    if (deg > -45 && deg <= 45) trySetDir({x: 1, y: 0});
-    else if (deg > 45 && deg <= 135) trySetDir({x: 0, y: 1});
-    else if (deg > -135 && deg <= -45) trySetDir({x: 0, y: -1});
-    else trySetDir({x: -1, y: 0});
+    // تصحیح جهت: چپ و راست برعکس نباشه
+    if (deg > -45 && deg <= 45) trySetDir({x: 1, y: 0});   // راست
+    else if (deg > 45 && deg <= 135) trySetDir({x: 0, y: 1}); // پایین
+    else if (deg > -135 && deg <= -45) trySetDir({x: 0, y: -1}); // بالا
+    else trySetDir({x: -1, y: 0});  // چپ
   }
 
   joystickBase.addEventListener('pointerdown', handleJoystickStart);
@@ -1111,11 +1114,11 @@
         joystickWrapper.style.top = y + 'px';
       } else {
         joystickWrapper.style.left = '20px';
-        joystickWrapper.style.top = (window.innerHeight - 160) + 'px';
+        joystickWrapper.style.top = (window.innerHeight - 180) + 'px';
       }
     } catch(e){
       joystickWrapper.style.left = '20px';
-      joystickWrapper.style.top = (window.innerHeight - 160) + 'px';
+      joystickWrapper.style.top = (window.innerHeight - 180) + 'px';
     }
   }
   function saveJoystickPosition(){
